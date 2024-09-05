@@ -37,6 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   circle_list: ^1.0.5
   clickable_list_wheel_view: ^0.2.0
+#  turn_page_transition: ^0.3.0
 
 
 dev_dependencies:

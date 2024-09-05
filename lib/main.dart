@@ -4,6 +4,8 @@ import 'package:dribbble/clock/clock1/wheel/test_list_wheell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'clock/clock2/index.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -84,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
               context,
               MaterialPageRoute(builder: (context) => LoopListPage()),
             )),
-    ListItem('todo5', (context) => debugPrint('todo5')),
+    ListItem('testpicker', (context) => Navigator.push(context, MaterialPageRoute(builder: (context) => const ClockPage2()))),
     ListItem('todo6', (context) => debugPrint('todo6')),
     ListItem('todo7', (context) => debugPrint('todo7')),
     ListItem('todo8', (context) => debugPrint('todo8')),

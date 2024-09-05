@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:dribbble/clock/clock1/wheel/circle_wheel_scroll_view.dart';
 import 'package:flutter/material.dart';
 
+/// https://dribbble.com/shots/24559980-Multiple-Alarm
+
 class ClockPage1 extends StatelessWidget {
   const ClockPage1({super.key});
 
