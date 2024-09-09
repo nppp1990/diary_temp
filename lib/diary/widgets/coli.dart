@@ -1,3 +1,4 @@
+import 'package:dribbble/diary/widgets/turn/turn_page_view.dart';
 import 'package:flutter/material.dart';
 
 class ColiContainer extends StatelessWidget {
@@ -11,17 +12,20 @@ class ColiContainer extends StatelessWidget {
     double coliWidth = coliPaddingLeft * 386 / 148;
     double coliHeight = coliWidth * 179 / 386;
     int coliCount = (height - coliHeight * 0.5) ~/ (coliHeight * 1.5);
+    final controller = TurnPageController(duration: const Duration(seconds: 1), cornerRadius: 10);
+
     return SizedBox(
       height: height,
       child: Stack(
         children: [
-          Container(
-            margin: EdgeInsets.only(left: coliPaddingLeft),
-            height: height,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: Colors.black, width: 2),
-              borderRadius: BorderRadius.circular(10),
+          Padding(
+            padding: EdgeInsets.only(left: coliPaddingLeft),
+            child: TurnPageView.builder(
+              controller: controller,
+              itemCount: 10,
+              itemBuilder: (context, index) => _Page(index: index, height: height, borderRadius: 10),
+              overleafColorBuilder: (index) => Colors.grey,
+              animationTransitionPoint: 0.35,
             ),
           ),
           Align(
@@ -30,7 +34,8 @@ class ColiContainer extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: List.generate(coliCount, (index) {
                 return Padding(
-                  padding: EdgeInsets.only(top: coliHeight * 0.5, bottom: index == coliCount - 1 ? coliHeight * 0.5 : 0),
+                  padding:
+                      EdgeInsets.only(top: coliHeight * 0.5, bottom: index == coliCount - 1 ? coliHeight * 0.5 : 0),
                   child: Coil(
                     coilColor: Colors.black,
                     width: coliWidth,
@@ -40,6 +45,52 @@ class ColiContainer extends StatelessWidget {
             ),
           )
         ],
+      ),
+    );
+  }
+}
+
+class _Page extends StatelessWidget {
+  final int index;
+  final double height;
+  final double borderRadius;
+
+  static const List<Color> colors = [
+    Colors.red,
+    Colors.green,
+    Colors.blue,
+    Colors.purple,
+    Colors.orange,
+    Colors.yellow,
+    Colors.pink,
+    Colors.teal,
+    Colors.cyan,
+    Colors.lime,
+  ];
+
+  const _Page({required this.index, required this.height, required this.borderRadius});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(borderRadius),
+          bottomRight: Radius.circular(borderRadius),
+        ),
+        border: Border.all(color: Colors.black, width: 2),
+      ),
+      child: Center(
+        child: Text(
+          'Page $index',
+          style: const TextStyle(
+            fontSize: 24,
+            color: Colors.black,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ),
     );
   }
@@ -87,26 +138,13 @@ class _CoilPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 
-    // ctx.moveTo(301, 289); p1
-    // ctx.bezierCurveTo(213, 259, 286, 190, 429, 236); p2, p3, p4
-
     // ctx.moveTo(311, 285);
     // ctx.bezierCurveTo(148, 261, 287, 182, 429, 237);
 
     // 148 [238, 95] 42 totalY= 95 + 42 + 42= 179
     Offset p1 = Offset(size.width * 148 / 386, size.height * 138 / 179); //
     Offset p4 = Offset(size.width, size.height * 42 / 179); //
-    var points = _getPoints(
-        p1,
-        p4,
-        311,
-        285,
-        148,
-        261,
-        287,
-        182,
-        429,
-        237);
+    var points = _getPoints(p1, p4, 311, 285, 148, 261, 287, 182, 429, 237);
     Offset p2 = points[0];
     Offset p3 = points[1];
     final Path path = Path();

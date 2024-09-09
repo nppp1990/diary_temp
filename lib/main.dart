@@ -1,10 +1,13 @@
 import 'package:dribbble/clock/clock1/index.dart';
 import 'package:dribbble/clock/clock1/wheel/test_wheel.dart';
 import 'package:dribbble/clock/clock1/wheel/test_list_wheell.dart';
+import 'package:dribbble/diary/button1.dart';
+import 'package:dribbble/diary/widgets/page_turn.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'clock/clock2/index.dart';
+import 'diary/widgets/test_paint.dart';
 
 void main() {
   runApp(const MyApp());
@@ -86,10 +89,10 @@ class _MyHomePageState extends State<MyHomePage> {
               context,
               MaterialPageRoute(builder: (context) => LoopListPage()),
             )),
-    ListItem('testpicker', (context) => Navigator.push(context, MaterialPageRoute(builder: (context) => const ClockPage2()))),
-    ListItem('todo6', (context) => debugPrint('todo6')),
-    ListItem('todo7', (context) => debugPrint('todo7')),
-    ListItem('todo8', (context) => debugPrint('todo8')),
+    ListItem('test picker', (context) => Navigator.push(context, MaterialPageRoute(builder: (context) => const ClockPage2()))),
+    ListItem('turn page', (context) => Navigator.push(context, MaterialPageRoute(builder: (context) => const PageTurnEffect()))),
+    ListItem('test card', (context) => Navigator.push(context, MaterialPageRoute(builder: (context) => const TestCardPage()))),
+    ListItem('test path', (context) => Navigator.push(context, MaterialPageRoute(builder: (context) => const TestPaintPage()))),
   ];
 
   @override

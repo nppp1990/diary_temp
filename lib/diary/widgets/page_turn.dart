@@ -26,15 +26,28 @@ class PageTurnEffect extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    final controller = TurnPageController();
+    final controller = TurnPageController(duration: const Duration(seconds: 1), cornerRadius: 20);
     return Scaffold(
-      body: TurnPageView.builder(
-        controller: controller,
-        itemCount: 10,
-        itemBuilder: (context, index) => _Page(index),
-        overleafColorBuilder: (index) => colors[index],
-        animationTransitionPoint: 0.5,
-      ),
+      body: Column(
+        children: [
+          const SizedBox(height: 100),
+          Padding(
+            padding: const EdgeInsets.all(30.0),
+            child: TurnPageView.builder(
+              controller: controller,
+              itemCount: 10,
+              itemBuilder: (context, index) => _Page(index),
+              overleafColorBuilder: (index) => Colors.grey,
+              animationTransitionPoint: 0.5,
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () => controller.nextPage(),
+            child: const Text('Next Page'),
+          ),
+        ],
+      )
     );
   }
 }
@@ -44,13 +57,30 @@ class _Page extends StatelessWidget {
 
   const _Page(this.index);
 
+  static const List<Color> colors = [
+    Colors.red,
+    Colors.green,
+    Colors.blue,
+    Colors.purple,
+    Colors.orange,
+    Colors.yellow,
+    Colors.pink,
+    Colors.teal,
+    Colors.cyan,
+    Colors.lime,
+  ];
+
   @override
   Widget build(BuildContext context) {
+    print('----build page $index----');
     return Container(
-      width: 200,
       height: 500,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        color: colors[index % colors.length],
+        borderRadius: const BorderRadius.only(
+          topRight: Radius.circular(20),
+          bottomRight: Radius.circular(20),
+        ),
         border: Border.all(color: Colors.black, width: 2),
       ),
       child: Center(

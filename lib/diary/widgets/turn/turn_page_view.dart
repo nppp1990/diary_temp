@@ -49,9 +49,9 @@ class TurnPageView extends StatefulWidget {
   State<TurnPageView> createState() => _TurnPageViewState();
 }
 
-class _TurnPageViewState extends State<TurnPageView>
-    with TickerProviderStateMixin {
+class _TurnPageViewState extends State<TurnPageView> with TickerProviderStateMixin {
   late final List<Widget> pages;
+
 
   @override
   void initState() {
@@ -71,17 +71,39 @@ class _TurnPageViewState extends State<TurnPageView>
         final animation = widget.controller._animation._controllers[pageIndex];
         final page = widget.itemBuilder(context, pageIndex);
 
-        return AnimatedBuilder(
-          animation: animation,
-          child: page,
-          builder: (context, child) => TurnPageAnimation(
-            animation: animation,
-            overleafColor: widget.overleafColorBuilder?.call(pageIndex) ??
-                defaultOverleafColor,
-            animationTransitionPoint: widget.animationTransitionPoint,
-            direction: widget.controller.direction,
-            child: child ?? page,
+        return ValueListenableBuilder<bool>(
+          valueListenable: widget.controller._animation.visibleNotifierList[pageIndex],
+          builder: (context, value, child) => Visibility(
+            visible: value,
+            child: AnimatedBuilder(
+              animation: animation,
+              child: page,
+              builder: (context, child) => TurnPageAnimation(
+                index: pageIndex,
+                animation: animation,
+                overleafColor: widget.overleafColorBuilder?.call(pageIndex) ?? defaultOverleafColor,
+                animationTransitionPoint: widget.animationTransitionPoint,
+                direction: widget.controller.direction,
+                cornerRadius: widget.controller.cornerRadius,
+                child: child ?? page,
+              ),
+            ),
           ),
+          // child: AnimatedBuilder(
+          //   animation: animation,
+          //   child: page,
+          //   builder: (context, child) => TurnPageAnimation(
+          //     index: pageIndex,
+          //     animation: animation,
+          //     // overleafColor指的是翻页时背面的颜色
+          //     overleafColor: widget.overleafColorBuilder?.call(pageIndex) ?? defaultOverleafColor,
+          //     // animationTransitionPoint指的是翻页动画的变化点
+          //     animationTransitionPoint: widget.animationTransitionPoint,
+          //     direction: widget.controller.direction,
+          //     cornerRadius: widget.controller.cornerRadius,
+          //     child: child ?? page,
+          //   ),
+          // ),
         );
       },
     );
@@ -95,6 +117,7 @@ class _TurnPageViewState extends State<TurnPageView>
 
   @override
   Widget build(BuildContext context) {
+    print('---build page view');
     final controller = widget.controller;
 
     return LayoutBuilder(
@@ -108,7 +131,21 @@ class _TurnPageViewState extends State<TurnPageView>
             constraints: constraints,
           );
         },
+
+        // onVerticalDragUpdate: (details) {
+        //   print('-----onVerticalDragUpdate: $details');
+        //   // if (!widget.useOnSwipe) {
+        //   //   return;
+        //   // }
+        //   // controller._onHorizontalDragUpdate(
+        //   //   details: details,
+        //   //   constraints: constraints,
+        //   // );
+        //
+        // },
+
         onHorizontalDragUpdate: (details) {
+          // print('-----onHorizontalDragUpdate: $details, useOnSwipe: ${widget.useOnSwipe}');
           if (!widget.useOnSwipe) {
             return;
           }
@@ -146,11 +183,14 @@ class TurnPageController extends ChangeNotifier {
   /// The duration during which the page is turned.
   final Duration duration;
 
+  final double cornerRadius;
+
   TurnPageController({
     this.initialPage = 0,
     this.direction = TurnDirection.rightToLeft,
     this.thresholdValue = _defaultThresholdValue,
     this.duration = defaultTransitionDuration,
+    this.cornerRadius = 0,
   }) : assert(0 <= thresholdValue && thresholdValue <= 1);
 
   late TurnAnimationController _animation;
@@ -159,6 +199,7 @@ class TurnPageController extends ChangeNotifier {
 
   int get currentIndex => _animation.currentIndex;
 
+  @override
   void dispose() {
     super.dispose();
     _animation.dispose();
@@ -186,8 +227,7 @@ class TurnPageController extends ChangeNotifier {
     required TapUpDetails details,
     required BoxConstraints constraints,
   }) {
-    final isLeftSideTapped =
-        details.localPosition.dx <= constraints.maxWidth / 2;
+    final isLeftSideTapped = details.localPosition.dx <= constraints.maxWidth / 2;
 
     switch (direction) {
       case TurnDirection.rightToLeft:
@@ -217,8 +257,7 @@ class TurnPageController extends ChangeNotifier {
     if (this._isTurnForward == null) {
       this._isTurnForward = delta >= 0;
     }
-    final isTurnForward =
-        this._isTurnForward != null ? this._isTurnForward! : delta >= 0;
+    final isTurnForward = this._isTurnForward != null ? this._isTurnForward! : delta >= 0;
 
     if (isTurnForward) {
       final currentPageController = _animation.currentPage;
@@ -231,6 +270,7 @@ class TurnPageController extends ChangeNotifier {
       } else if (updated >= 1.0) {
         updated = 1.0;
       }
+      // print('-----updated: $updated');
       _animation.updateCurrentPage(updated);
       notifyListeners();
     } else {
@@ -244,6 +284,7 @@ class TurnPageController extends ChangeNotifier {
       } else if (updated >= 1.0) {
         updated = 1.0;
       }
+      // print('-----updatePreviousPage: $updated');
       _animation.updatePreviousPage(updated);
       notifyListeners();
     }
@@ -285,6 +326,8 @@ class TurnAnimationController {
 
   final List<AnimationController> _controllers;
 
+  final List<ValueNotifier<bool>> visibleNotifierList;
+
   int currentIndex;
 
   TurnAnimationController({
@@ -293,22 +336,24 @@ class TurnAnimationController {
     required this.itemCount,
     required this.thresholdValue,
     required this.duration,
+    int preShowPageCount = 2,
   })  : currentIndex = initialPage,
         _controllers = List.generate(
           itemCount,
           (index) => AnimationController(
             vsync: vsync,
             duration: duration,
-            value:
-                index < initialPage ? _animationMaxValue : _animationMinValue,
+            value: index < initialPage ? _animationMaxValue : _animationMinValue,
           ),
+        ),
+        visibleNotifierList = List.generate(
+          itemCount,
+          (index) => ValueNotifier<bool>(index >= initialPage - 1 && index < initialPage + preShowPageCount),
         );
 
-  AnimationController? get previousPage =>
-      currentIndex > 0 ? _controllers[currentIndex - 1] : null;
+  AnimationController? get previousPage => currentIndex > 0 ? _controllers[currentIndex - 1] : null;
 
-  AnimationController? get currentPage =>
-      currentIndex < itemCount - 1 ? _controllers[currentIndex] : null;
+  AnimationController? get currentPage => currentIndex < itemCount - 1 ? _controllers[currentIndex] : null;
 
   bool get thresholdExceeded {
     final currentPage = this.currentPage;
@@ -324,6 +369,9 @@ class TurnAnimationController {
   void dispose() {
     for (final controller in _controllers) {
       controller.dispose();
+    }
+    for (final notifier in visibleNotifierList) {
+      notifier.dispose();
     }
   }
 
@@ -356,6 +404,11 @@ class TurnAnimationController {
     }
     currentPage?.animateTo(_animationMaxValue);
     currentIndex++;
+    // print('-----currentIndex: $currentIndex');
+    if (currentIndex + 1 >= itemCount) {
+      return;
+    }
+    visibleNotifierList[currentIndex + 1].value = true;
   }
 
   Future<void> turnPreviousPage() async {
@@ -364,6 +417,10 @@ class TurnAnimationController {
     }
     previousPage?.animateTo(_animationMinValue);
     currentIndex--;
+    if (currentIndex - 1 < 0) {
+      return;
+    }
+    visibleNotifierList[currentIndex - 1].value = true;
   }
 
   void jump(int index) {
@@ -390,5 +447,12 @@ class TurnAnimationController {
       _controllers[index].animateTo(0.0);
     }
     currentIndex = index;
+    visibleNotifierList[index].value = true;
+    if (currentIndex - 1 >= 0) {
+      visibleNotifierList[currentIndex - 1].value = true;
+    }
+    if (currentIndex + 1 < itemCount) {
+      visibleNotifierList[currentIndex + 1].value = true;
+    }
   }
 }

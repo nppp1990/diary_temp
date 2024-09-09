@@ -35,7 +35,7 @@ class TestLayout extends StatelessWidget {
                   const SizedBox(height: 20),
                   // const Coil(),
                   const ColiContainer(
-                    coliPaddingLeft: 30,
+                    coliPaddingLeft: 20,
                     height: 580,
                   ),
                   const SizedBox(height: 120),
@@ -139,6 +139,17 @@ class MemphisCard extends StatelessWidget {
       height: 100,
       decoration: decoration,
       child: child,
+    );
+  }
+}
+
+class TestCardPage extends StatelessWidget {
+  const TestCardPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: TestLayout(),
     );
   }
 }
