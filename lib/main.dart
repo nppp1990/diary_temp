@@ -2,11 +2,14 @@ import 'package:dribbble/clock/clock1/index.dart';
 import 'package:dribbble/clock/clock1/wheel/test_wheel.dart';
 import 'package:dribbble/clock/clock1/wheel/test_list_wheell.dart';
 import 'package:dribbble/diary/button1.dart';
+import 'package:dribbble/diary/widgets/edit/edit_demo2.dart';
+import 'package:dribbble/diary/widgets/edit/edit_demo3.dart';
 import 'package:dribbble/diary/widgets/page_turn.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'clock/clock2/index.dart';
+import 'diary/common/test_colors.dart';
 import 'diary/widgets/test_paint.dart';
 
 void main() {
@@ -25,7 +28,10 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const DefaultTextStyle(
+        style: TextStyle(color: TestColors.black1),
+        child: MyHomePage(title: 'Flutter Demo Home Page'),
+      ),
     );
   }
 }
@@ -89,10 +95,25 @@ class _MyHomePageState extends State<MyHomePage> {
               context,
               MaterialPageRoute(builder: (context) => LoopListPage()),
             )),
-    ListItem('test picker', (context) => Navigator.push(context, MaterialPageRoute(builder: (context) => const ClockPage2()))),
-    ListItem('turn page', (context) => Navigator.push(context, MaterialPageRoute(builder: (context) => const PageTurnEffect()))),
-    ListItem('test card', (context) => Navigator.push(context, MaterialPageRoute(builder: (context) => const TestCardPage()))),
-    ListItem('test path', (context) => Navigator.push(context, MaterialPageRoute(builder: (context) => const TestPaintPage()))),
+    ListItem('test picker',
+        (context) => Navigator.push(context, MaterialPageRoute(builder: (context) => const ClockPage2()))),
+    ListItem('turn page',
+        (context) => Navigator.push(context, MaterialPageRoute(builder: (context) => const PageTurnEffect()))),
+    ListItem('test card',
+        (context) => Navigator.push(context, MaterialPageRoute(builder: (context) => const TestCardPage()))),
+    ListItem('test path',
+        (context) => Navigator.push(context, MaterialPageRoute(builder: (context) => const TestPaintPage()))),
+    ListItem('test edit',
+        (context) => Navigator.push(context, MaterialPageRoute(builder: (context) => const QuillEditorDemo()))),
+    ListItem('test edit3', (context) async {
+      await Navigator.push(context, MaterialPageRoute(builder: (context) => const TestEditDemo3()));
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          statusBarColor: Colors.white,
+          systemNavigationBarColor: Colors.white,
+        ),
+      );
+    }),
   ];
 
   @override
@@ -100,8 +121,8 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.transparent,
+        statusBarColor: Colors.white,
+        systemNavigationBarColor: Colors.white,
       ),
     );
   }
@@ -109,19 +130,21 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+      // appBar: AppBar(
+      //   backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      //   title: Text(widget.title),
+      // ),
+      body: SafeArea(
+        child: ListView.builder(
+            itemCount: test.length,
+            padding: const EdgeInsets.all(8),
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: Text(test[index].key),
+                onTap: () => test[index].onItemClick(context),
+              );
+            }),
       ),
-      body: ListView.builder(
-          itemCount: test.length,
-          padding: const EdgeInsets.all(8),
-          itemBuilder: (context, index) {
-            return ListTile(
-              title: Text(test[index].key),
-              onTap: () => test[index].onItemClick(context),
-            );
-          }),
     );
   }
 }

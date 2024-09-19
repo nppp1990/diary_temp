@@ -2,6 +2,43 @@ import 'dart:math';
 import 'dart:ui';
 
 abstract class PathUtils {
+
+  static Offset getEndPoint(Offset start, double length, double angle) {
+    return Offset(
+      start.dx + length * cos(angle),
+      start.dy + length * sin(angle),
+    );
+  }
+
+  /// bezier: [startX, startY, controlX, controlY, endX, endY]
+  static Offset quadraticBezierPoint(Offset start, Offset end, List<double> bezier) {
+    double xUnit = (end.dx - start.dx)/ (bezier[4] - bezier[0]);
+    double yUnit = (end.dy - start.dy) / (bezier[5] - bezier[1]);
+    return Offset(
+      start.dx + (bezier[2] - bezier[0]) * xUnit,
+      start.dy + (bezier[3] - bezier[1]) * yUnit,
+    );
+  }
+
+  /// 计算三阶贝塞尔曲线的两个控制点
+  /// bezier: [startX, startY, controlX1, controlY1, controlX2, controlY2, endX, endY]
+  /// 返回两个控制点
+  static List<Offset> cubicBezierPoint(Offset start, Offset end, List<double> bezier) {
+    double xUnit = (end.dx - start.dx) / (bezier[6] - bezier[0]);
+    double yUnit = (end.dy - start.dy) / (bezier[7] - bezier[1]);
+    return [
+      Offset(
+        start.dx + (bezier[2] - bezier[0]) * xUnit,
+        start.dy + (bezier[3] - bezier[1]) * yUnit,
+      ),
+      Offset(
+        start.dx + (bezier[4] - bezier[0]) * xUnit,
+        start.dy + (bezier[5] - bezier[1]) * yUnit,
+      ),
+    ];
+  }
+
+
   static Offset getSymmetryPoint(Offset point, Offset start, Offset end) {
     // Calculate the slope (m) and intercept (c) of the line
     double m = (end.dy - start.dy) / (end.dx - start.dx);
