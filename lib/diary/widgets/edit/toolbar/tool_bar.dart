@@ -78,7 +78,10 @@ class _ToolbarState extends State<Toolbar> {
                   KeyboardUtils.hideKeyboard(context);
                   ToolBarDialogProvider.of(context).showBackgroundDialog(true);
                 }),
-                _buildToolbarButton('assets/icons/ic_emotion.svg', controller, _showEmotionBox, () {}),
+                _buildToolbarButton('assets/icons/ic_emotion.svg', controller, false, () {
+                  KeyboardUtils.hideKeyboard(context);
+                  ToolBarDialogProvider.of(context).showEmotionDialog(true);
+                }),
                 _buildToolbarButton('assets/icons/ic_text.svg', controller, _showTextBox, () {
                   bool show = !_showTextBox;
                   setState(() {

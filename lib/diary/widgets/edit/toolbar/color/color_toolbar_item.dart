@@ -141,6 +141,7 @@ class ColorSelectDialog extends StatelessWidget {
       hex = '#$hex';
     }
     // todo bug: 文字有背景时，光标看不见，https://github.com/singerdmx/flutter-quill/issues/1720
+    controller.skipRequestKeyboard = true;
     controller.formatSelection(
       isBackground ? BackgroundAttribute(hex) : ColorAttribute(hex),
     );
