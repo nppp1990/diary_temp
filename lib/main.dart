@@ -125,7 +125,18 @@ class _MyHomePageState extends State<MyHomePage> {
         systemNavigationBarColor: Colors.white,
       ),
     );
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _init();
+    });
+
   }
+
+  _init() async {
+    precacheImage(const AssetImage('assets/images/bg_base1.png'), context);
+    precacheImage(const AssetImage('assets/images/bg_base2.png'), context);
+  }
+
+
 
   @override
   Widget build(BuildContext context) {

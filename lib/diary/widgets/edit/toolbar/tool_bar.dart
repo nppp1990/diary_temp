@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:dribbble/diary/common/test_colors.dart';
 import 'package:dribbble/diary/common/test_configuration.dart';
+import 'package:dribbble/diary/utils/keyboard.dart';
+import 'package:dribbble/diary/widgets/edit/edit_demo3.dart';
 import 'package:dribbble/diary/widgets/edit/toolbar/history.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -55,13 +57,6 @@ class _ToolbarState extends State<Toolbar> {
     super.dispose();
   }
 
-  void _hideKeyboard(BuildContext context) {
-    final currentFocus = FocusScope.of(context);
-    if (!currentFocus.hasPrimaryFocus && currentFocus.hasFocus) {
-      FocusManager.instance.primaryFocus?.unfocus();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     print('-----build toolbar');
@@ -77,8 +72,12 @@ class _ToolbarState extends State<Toolbar> {
             color: TestColors.toolBarBackground,
             child: Row(
               children: [
-                _buildToolbarButton('assets/icons/ic_template.svg', controller, false, () {}),
-                _buildToolbarButton('assets/icons/ic_background.svg', controller, false, () {}),
+                _buildToolbarButton('assets/icons/ic_template.svg', controller, false, () {
+                }),
+                _buildToolbarButton('assets/icons/ic_background.svg', controller, false, () {
+                  KeyboardUtils.hideKeyboard(context);
+                  ToolBarDialogProvider.of(context).showBackgroundDialog(true);
+                }),
                 _buildToolbarButton('assets/icons/ic_emotion.svg', controller, _showEmotionBox, () {}),
                 _buildToolbarButton('assets/icons/ic_text.svg', controller, _showTextBox, () {
                   bool show = !_showTextBox;

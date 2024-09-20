@@ -2,36 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class BackgroundController {
-  final ValueNotifier<BackgroundInfo> backgroundInfo;
+  final ValueNotifier<BackgroundInfo?> backgroundInfo;
 
   BackgroundController({
-    AssetImage? assetImage,
-    Color? backgroundColor,
-  }) : backgroundInfo = ValueNotifier(BackgroundInfo(
-          assetImage: assetImage,
-          backgroundColor: backgroundColor,
-        ));
+    BackgroundInfo? info,
+  }) : backgroundInfo = ValueNotifier(info);
 
-  void changeBackground({AssetImage? assetImage, Color? backgroundColor}) {
-    if (assetImage != null) {
+  void changeBackground(BackgroundInfo? info) {
+    if (info == null) {
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          statusBarColor: Colors.white,
+          systemNavigationBarColor: Colors.white,
+        ),
+      );
+    } else if (info.isColor) {
+      SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(
+          statusBarColor: info.backgroundColor,
+          systemNavigationBarColor: Colors.white,
+        ),
+      );
+    } else {
       SystemChrome.setSystemUIOverlayStyle(
         const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           systemNavigationBarColor: Colors.transparent,
         ),
       );
-    } else {
-      SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(
-          statusBarColor: backgroundColor,
-          systemNavigationBarColor: Colors.white,
-        ),
-      );
     }
-    backgroundInfo.value = BackgroundInfo(
-      assetImage: assetImage,
-      backgroundColor: backgroundColor,
-    );
+    backgroundInfo.value = info;
   }
 }
 
@@ -41,6 +41,8 @@ class BackgroundInfo {
   final Color? systemNavigationBarColor;
 
   const BackgroundInfo({this.assetImage, this.backgroundColor, this.systemNavigationBarColor});
+
+  bool get isColor => backgroundColor != null;
 }
 
 class PageBackground extends StatefulWidget {
@@ -57,19 +59,19 @@ class _PageBackgroundState extends State<PageBackground> {
   @override
   void initState() {
     super.initState();
-    final BackgroundInfo info = widget.controller.backgroundInfo.value;
-    if (info.assetImage != null) {
+    final BackgroundInfo? info = widget.controller.backgroundInfo.value;
+    if (info == null || info.isColor) {
       SystemChrome.setSystemUIOverlayStyle(
-        const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          systemNavigationBarColor: Colors.transparent,
+        SystemUiOverlayStyle(
+          statusBarColor: info?.backgroundColor ?? Colors.white,
+          systemNavigationBarColor: info?.systemNavigationBarColor ?? Colors.white,
         ),
       );
     } else {
       SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(
-          statusBarColor: info.backgroundColor,
-          systemNavigationBarColor: Colors.white,
+        const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          systemNavigationBarColor: Colors.transparent,
         ),
       );
     }
@@ -80,25 +82,20 @@ class _PageBackgroundState extends State<PageBackground> {
     return ValueListenableBuilder(
         valueListenable: widget.controller.backgroundInfo,
         builder: (context, info, child) {
-          if (info.assetImage != null) {
-            return Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: info.assetImage!,
-                  fit: BoxFit.cover,
-                ),
+          final bool isColorBackground = info == null || info.isColor;
+          return Container(
+            decoration: BoxDecoration(
+              color: isColorBackground ? info?.backgroundColor ?? Colors.white : null,
+              image: isColorBackground ? null : DecorationImage(
+                image: info.assetImage!,
+                fit: BoxFit.cover,
               ),
-              child: Scaffold(
-                backgroundColor: Colors.transparent,
-                body: child,
-              ),
-            );
-          } else {
-            return Scaffold(
-              backgroundColor: info.backgroundColor,
+            ),
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
               body: child,
-            );
-          }
+            ),
+          );
         },
         child: widget.child);
   }

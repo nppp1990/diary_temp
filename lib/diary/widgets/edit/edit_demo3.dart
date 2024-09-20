@@ -1,6 +1,7 @@
 import 'package:dribbble/diary/common/test_configuration.dart';
 import 'package:dribbble/diary/utils/keyboard.dart';
 import 'package:dribbble/diary/widgets/bg_page.dart';
+import 'package:dribbble/diary/widgets/edit/toolbar/background/background_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -31,12 +32,14 @@ class TestEditState extends State<TestEdit> {
 
   // late bool _showColorDialog;
   late ValueNotifier<bool> _showColorDialogNotifier;
+  late ValueNotifier<bool> _showBackgroundDialogNotifier;
 
   @override
   void initState() {
     super.initState();
     // _showColorDialog = false;
     _showColorDialogNotifier = ValueNotifier<bool>(false);
+    _showBackgroundDialogNotifier = ValueNotifier<bool>(false);
   }
 
   @override
@@ -47,17 +50,18 @@ class TestEditState extends State<TestEdit> {
 
   void showColorDialog(bool show) {
     _showColorDialogNotifier.value = show;
-    // setState(() {
-    //   _showColorDialog = show;
-    // });
   }
 
-  void hideDialog() {
-    _showColorDialogNotifier.value = false;
-    // setState(() {
-    //   _showColorDialog = false;
-    // });
+  void showBackgroundDialog(bool show) {
+    _showBackgroundDialogNotifier.value = show;
   }
+
+  // void hideDialog() {
+  //   _showColorDialogNotifier.value = false;
+  //   // setState(() {
+  //   //   _showColorDialog = false;
+  //   // });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -76,9 +80,6 @@ class TestEditState extends State<TestEdit> {
                       width: double.infinity,
                       child: ElevatedButton(
                           onPressed: () {
-                            backgroundController.changeBackground(
-                              assetImage: const AssetImage('assets/images/bg_base1.png'),
-                            );
                             // showColorDialog(!_showColorDialog);
                           },
                           child: const Center(child: Text('Change Background'))),
@@ -104,7 +105,24 @@ class TestEditState extends State<TestEdit> {
                               controller: controller,
                             ),
                             onDismiss: () {
+                              showColorDialog(false);
                               KeyboardUtils.showKeyboardByChannel();
+                            },
+                          )
+                        : const SizedBox.shrink();
+                  },
+                ),
+                ValueListenableBuilder<bool>(
+                  valueListenable: _showBackgroundDialogNotifier,
+                  builder: (context, show, child) {
+                    return show
+                        ? SecondDialog(
+                            title: 'Background',
+                            child: BackgroundSelector(
+                              controller: backgroundController,
+                            ),
+                            onDismiss: () {
+                              showBackgroundDialog(false);
                             },
                           )
                         : const SizedBox.shrink();

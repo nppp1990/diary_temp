@@ -3,6 +3,7 @@ import 'package:dribbble/diary/common/test_configuration.dart';
 import 'package:dribbble/diary/widgets/edit/edit_demo3.dart';
 import 'package:dribbble/diary/widgets/icon/arrow.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 abstract class Test {
   static void showSecondDialog(BuildContext context, Widget child) {
@@ -60,10 +61,8 @@ class _SecondDialogState extends State<SecondDialog> with SingleTickerProviderSt
     if (!context.mounted) {
       return;
     }
-    ToolBarDialogProvider.of(context).hideDialog();
+    // ToolBarDialogProvider.of(context).hideDialog();
     widget.onDismiss?.call();
-    // todo
-    // Navigator.of(context).pop();
   }
 
   @override
@@ -151,7 +150,25 @@ class _SecondDialogState extends State<SecondDialog> with SingleTickerProviderSt
                                           ),
                                         )),
                                   ),
-                                )
+                                ),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.translucent,
+                                    onTap: () {
+                                      _handlePop(context);
+                                    },
+                                    child: SizedBox(
+                                        width: 36,
+                                        height: 36,
+                                        child: SvgPicture.asset(
+                                          'assets/icons/ic_right.svg',
+                                          colorFilter: const ColorFilter.mode(TestColors.black1, BlendMode.srcIn),
+                                          width: 16,
+                                          height: 16,
+                                        )),
+                                  ),
+                                ),
                               ],
                             )),
                       ),
