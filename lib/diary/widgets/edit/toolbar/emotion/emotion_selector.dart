@@ -32,6 +32,7 @@ class EmotionSelector extends StatelessWidget {
               itemBuilder: (context, index) {
                 final String emoji = _emojiList[index];
                 return GestureDetector(
+                  behavior: HitTestBehavior.translucent,
                   onTap: () => onEmotionSelected(emoji),
                   child: Center(
                     child: Text(

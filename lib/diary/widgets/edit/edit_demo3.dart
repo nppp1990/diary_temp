@@ -43,6 +43,7 @@ class TestEditState extends State<TestEdit> {
     _showColorDialogNotifier = ValueNotifier<bool>(false);
     _showBackgroundDialogNotifier = ValueNotifier<bool>(false);
     _showEmotionDialogNotifier = ValueNotifier<bool>(false);
+    _formatTitle();
   }
 
   @override
@@ -65,12 +66,11 @@ class TestEditState extends State<TestEdit> {
     _showEmotionDialogNotifier.value = show;
   }
 
-  // void hideDialog() {
-  //   _showColorDialogNotifier.value = false;
-  //   // setState(() {
-  //   //   _showColorDialog = false;
-  //   // });
-  // }
+  void _formatTitle() {
+    // todo
+    controller.formatText(0, 1, Attribute.h2);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -97,29 +97,34 @@ class TestEditState extends State<TestEdit> {
                           },
                           child: const Center(child: Text('test1'))),
                     ),
-                    SizedBox(
-                      height: 60,
-                      width: double.infinity,
-                      child: ElevatedButton(
-                          onPressed: () {
-                            // showColorDialog(!_showColorDialog);
-                          },
-                          child: const Center(child: Text('test2'))),
-                    ),
-                    SizedBox(
-                      height: 60,
-                      width: double.infinity,
-                      child: ElevatedButton(
-                          onPressed: () {
-                            // showColorDialog(!_showColorDialog);
-                          },
-                          child: const Center(child: Text('test3'))),
-                    ),
+                    // SizedBox(
+                    //   height: 60,
+                    //   width: double.infinity,
+                    //   child: ElevatedButton(
+                    //       onPressed: () {
+                    //         // showColorDialog(!_showColorDialog);
+                    //       },
+                    //       child: const Center(child: Text('test2'))),
+                    // ),
+                    // SizedBox(
+                    //   height: 60,
+                    //   width: double.infinity,
+                    //   child: ElevatedButton(
+                    //       onPressed: () {
+                    //         // showColorDialog(!_showColorDialog);
+                    //       },
+                    //       child: const Center(child: Text('test3'))),
+                    // ),
                     Expanded(
                       child: QuillEditor.basic(
                         controller: controller,
                         configurations: const QuillEditorConfigurations(
                           padding: EdgeInsets.all(TestConfiguration.editorPadding),
+                          placeholder: 'title',
+                          // expands: true,
+                          paintCursorAboveText: true,
+
+
                         ),
                       ),
                     ),
