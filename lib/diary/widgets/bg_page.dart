@@ -9,28 +9,29 @@ class BackgroundController {
   }) : backgroundInfo = ValueNotifier(info);
 
   void changeBackground(BackgroundInfo? info) {
-    if (info == null) {
-      SystemChrome.setSystemUIOverlayStyle(
-        const SystemUiOverlayStyle(
-          statusBarColor: Colors.white,
-          systemNavigationBarColor: Colors.white,
-        ),
-      );
-    } else if (info.isColor) {
-      SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(
-          statusBarColor: info.backgroundColor,
-          systemNavigationBarColor: Colors.white,
-        ),
-      );
-    } else {
-      SystemChrome.setSystemUIOverlayStyle(
-        const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          systemNavigationBarColor: Colors.transparent,
-        ),
-      );
-    }
+    // if (info == null) {
+    //   SystemChrome.setSystemUIOverlayStyle(
+    //     const SystemUiOverlayStyle(
+    //       statusBarColor: Colors.white,
+    //       systemNavigationBarColor: Colors.white,
+    //     ),
+    //   );
+    // } else if (info.isColor) {
+    //   SystemChrome.setSystemUIOverlayStyle(
+    //     SystemUiOverlayStyle(
+    //       // statusBarColor: info.backgroundColor,
+    //       statusBarColor: Colors.transparent,
+    //       systemNavigationBarColor: Colors.white,
+    //     ),
+    //   );
+    // } else {
+    //   SystemChrome.setSystemUIOverlayStyle(
+    //     const SystemUiOverlayStyle(
+    //       statusBarColor: Colors.transparent,
+    //       systemNavigationBarColor: Colors.transparent,
+    //     ),
+    //   );
+    // }
     backgroundInfo.value = info;
   }
 }
@@ -59,22 +60,28 @@ class _PageBackgroundState extends State<PageBackground> {
   @override
   void initState() {
     super.initState();
-    final BackgroundInfo? info = widget.controller.backgroundInfo.value;
-    if (info == null || info.isColor) {
-      SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(
-          statusBarColor: info?.backgroundColor ?? Colors.white,
-          systemNavigationBarColor: info?.systemNavigationBarColor ?? Colors.white,
-        ),
-      );
-    } else {
-      SystemChrome.setSystemUIOverlayStyle(
-        const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          systemNavigationBarColor: Colors.transparent,
-        ),
-      );
-    }
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.transparent,
+      ),
+    );
+    // final BackgroundInfo? info = widget.controller.backgroundInfo.value;
+    // if (info == null || info.isColor) {
+    //   SystemChrome.setSystemUIOverlayStyle(
+    //     SystemUiOverlayStyle(
+    //       statusBarColor: info?.backgroundColor ?? Colors.white,
+    //       systemNavigationBarColor: info?.systemNavigationBarColor ?? Colors.white,
+    //     ),
+    //   );
+    // } else {
+    //   SystemChrome.setSystemUIOverlayStyle(
+    //     const SystemUiOverlayStyle(
+    //       statusBarColor: Colors.transparent,
+    //       systemNavigationBarColor: Colors.transparent,
+    //     ),
+    //   );
+    // }
   }
 
   @override
@@ -83,17 +90,17 @@ class _PageBackgroundState extends State<PageBackground> {
         valueListenable: widget.controller.backgroundInfo,
         builder: (context, info, child) {
           final bool isColorBackground = info == null || info.isColor;
-          return Container(
-            decoration: BoxDecoration(
-              color: isColorBackground ? info?.backgroundColor ?? Colors.white : null,
-              image: isColorBackground ? null : DecorationImage(
-                image: info.assetImage!,
-                fit: BoxFit.cover,
+          return Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Container(
+              decoration: BoxDecoration(
+                color: isColorBackground ? info?.backgroundColor ?? Colors.white : null,
+                image: isColorBackground ? null : DecorationImage(
+                  image: info.assetImage!,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              body: child,
+              child: child,
             ),
           );
         },

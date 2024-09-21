@@ -4,6 +4,7 @@ import 'package:dribbble/clock/clock1/wheel/test_list_wheell.dart';
 import 'package:dribbble/diary/button1.dart';
 import 'package:dribbble/diary/widgets/edit/edit_demo2.dart';
 import 'package:dribbble/diary/widgets/edit/edit_demo3.dart';
+import 'package:dribbble/diary/widgets/emotion/emotion_list.dart';
 import 'package:dribbble/diary/widgets/page_turn.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -114,6 +115,8 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       );
     }),
+    ListItem('test emotion', (context) => Navigator.push(context, MaterialPageRoute(builder: (context) => const EmotionTestPage())),
+    ),
   ];
 
   @override

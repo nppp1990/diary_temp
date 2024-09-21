@@ -1,6 +1,8 @@
+import 'package:dribbble/diary/common/test_colors.dart';
 import 'package:dribbble/diary/common/test_configuration.dart';
 import 'package:dribbble/diary/utils/keyboard.dart';
 import 'package:dribbble/diary/widgets/bg_page.dart';
+import 'package:dribbble/diary/widgets/edit/header/edit_header.dart';
 import 'package:dribbble/diary/widgets/edit/toolbar/background/background_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -71,7 +73,6 @@ class TestEditState extends State<TestEdit> {
     controller.formatText(0, 1, Attribute.h2);
   }
 
-
   @override
   Widget build(BuildContext context) {
     print('----build demo3');
@@ -84,37 +85,9 @@ class TestEditState extends State<TestEdit> {
               child: Stack(children: [
                 Column(
                   children: [
-                    SizedBox(
-                      height: 60,
-                      width: double.infinity,
-                      child: ElevatedButton(
-                          onPressed: () {
-                            // showColorDialog(!_showColorDialog);
-                            final int index = controller.selection.baseOffset;
-                            // final length = controller.selection.extentOffset - index;
-                            // controller.replaceText(index, length, BlockEmbed.image('assets/images/ic_emotion1.png'), null);
-                            controller.replaceText(index, 0, 'test insert', null);
-                          },
-                          child: const Center(child: Text('test1'))),
-                    ),
-                    // SizedBox(
-                    //   height: 60,
-                    //   width: double.infinity,
-                    //   child: ElevatedButton(
-                    //       onPressed: () {
-                    //         // showColorDialog(!_showColorDialog);
-                    //       },
-                    //       child: const Center(child: Text('test2'))),
-                    // ),
-                    // SizedBox(
-                    //   height: 60,
-                    //   width: double.infinity,
-                    //   child: ElevatedButton(
-                    //       onPressed: () {
-                    //         // showColorDialog(!_showColorDialog);
-                    //       },
-                    //       child: const Center(child: Text('test3'))),
-                    // ),
+                    const EditHeader1(),
+                    const EditHeader2(),
+                    Container(height: 1, color: TestColors.greyDivider1),
                     Expanded(
                       child: QuillEditor.basic(
                         controller: controller,
@@ -123,8 +96,6 @@ class TestEditState extends State<TestEdit> {
                           placeholder: 'title',
                           // expands: true,
                           paintCursorAboveText: true,
-
-
                         ),
                       ),
                     ),
@@ -175,7 +146,8 @@ class TestEditState extends State<TestEdit> {
                                 // showEmotionDialog(false);
                                 final int index = controller.selection.baseOffset;
                                 controller.skipRequestKeyboard = true;
-                                controller.replaceText(index, 0, emoji, TextSelection.collapsed(offset: index + emoji.length));
+                                controller.replaceText(
+                                    index, 0, emoji, TextSelection.collapsed(offset: index + emoji.length));
                                 KeyboardUtils.hideKeyboardByChannel();
                               },
                             ),

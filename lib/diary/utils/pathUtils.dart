@@ -3,11 +3,15 @@ import 'dart:ui';
 
 abstract class PathUtils {
 
-  static Offset getEndPoint(Offset start, double length, double angle) {
-    return Offset(
-      start.dx + length * cos(angle),
-      start.dy + length * sin(angle),
-    );
+  /// 计算椭圆上的点
+  /// center: 椭圆中心
+  /// a: 椭圆长轴半径
+  /// b: 椭圆短轴半径
+  /// angle: 角度（弧度）
+  static Offset getPointOnEllipse(Offset center, double a, double b, double angle) {
+    double x = center.dx + a * cos(angle);
+    double y = center.dy + b * sin(angle);
+    return Offset(x, y);
   }
 
   /// bezier: [startX, startY, controlX, controlY, endX, endY]

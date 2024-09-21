@@ -9,4 +9,25 @@ abstract class TestColors {
   static const Color greyDivider1 = Color(0xFFDBDBDB);
   static const Color greyDivider2 = Color(0xFFF4F4F4);
   static const Color disabled = Color(0xFFBDBDBD);
+
+
+// - 生气 9B101C
+// - 沮丧 658EA5
+// - 担忧 E1512B
+// - 伤心 CBDCE3
+// - 平静、放松  C1CF9C
+// - 开心 FA9153
+// - 兴奋  FABD63
+// - 大笑  FCDB64
+
+ static const List<Color> moodColors = [
+    Color(0xFF9B101C), // 生气
+    Color(0xFF658EA5), // 沮丧
+    Color(0xFFE1512B), // 担忧
+    Color(0xFFCBDCE3), // 伤心
+    Color(0xFFC1CF9C), // 平静
+    Color(0xFFFA9153), // 开心
+    Color(0xFFFABD63), // 兴奋
+    Color(0xFFFCDB64), // 大笑
+  ];
 }
