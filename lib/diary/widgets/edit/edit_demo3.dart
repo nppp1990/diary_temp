@@ -86,7 +86,17 @@ class TestEditState extends State<TestEdit> {
                 Column(
                   children: [
                     const EditHeader1(),
-                    const EditHeader2(),
+                    EditHeader2(
+                      date: DateTime.now(),
+                      emotionIndex: 0,
+                      onDateChanged: (date) {
+                        // year, month, day hh:mm
+                        print('----date: $date');
+                      },
+                      onEmotionChanged: (index) {
+                        print('----emotion: $index');
+                      },
+                    ),
                     Container(height: 1, color: TestColors.greyDivider1),
                     Expanded(
                       child: QuillEditor.basic(

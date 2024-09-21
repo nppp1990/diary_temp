@@ -3,7 +3,6 @@ import 'package:dribbble/diary/common/test_configuration.dart';
 import 'package:dribbble/diary/widgets/bubble.dart';
 import 'package:dribbble/diary/widgets/icon/arrow.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class EditHeader1 extends StatelessWidget {
@@ -57,25 +56,72 @@ class EditHeader1 extends StatelessWidget {
   }
 }
 
-class EditHeader2 extends StatelessWidget {
-  const EditHeader2({super.key});
+class EditHeader2 extends StatefulWidget {
+  final DateTime date;
+  final int emotionIndex;
+  final ValueChanged<DateTime>? onDateChanged;
+  final ValueChanged<int>? onEmotionChanged;
+
+  const EditHeader2({
+    super.key,
+    required this.date,
+    required this.emotionIndex,
+    this.onDateChanged,
+    this.onEmotionChanged,
+  });
+
+  @override
+  State<StatefulWidget> createState() => _EditHeader2State();
+}
+
+class _EditHeader2State extends State<EditHeader2> {
+  late DateTime _date;
+
+  @override
+  void initState() {
+    super.initState();
+    _date = widget.date;
+  }
+
+  @override
+  void didUpdateWidget(covariant EditHeader2 oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.date != oldWidget.date) {
+      _date = widget.date;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: TestConfiguration.editHeaderPadding),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: TestConfiguration.editHeaderPadding),
       child: SizedBox(
         height: TestConfiguration.editHeaderHeight,
         child: Row(
           children: [
-            Text(
-              '20 sep 2021 12:00',
-              style: TextStyle(
-                fontSize: 18,
-              ),
+            _DateSelector(
+              date: _date,
+              onChanged: (date) {
+                // _date和_time得到的_data
+                _date = DateTime(date.year, date.month, date.day, _date.hour, _date.minute);
+                widget.onDateChanged?.call(_date);
+              },
             ),
-            Spacer(),
-            _EmotionSelector(),
+            const SizedBox(width: 10),
+            _TimeSelector(
+              time: _date,
+              onChanged: (time) {
+                // _date和_time得到的_data
+                _date = DateTime(_date.year, _date.month, _date.day, time.hour, time.minute);
+                widget.onDateChanged?.call(_date);
+              },
+            ),
+            const SizedBox(width: 16),
+            const Spacer(),
+            _EmotionSelector(
+              emotionIndex: widget.emotionIndex,
+              onChanged: widget.onEmotionChanged,
+            ),
           ],
         ),
       ),
@@ -83,10 +129,121 @@ class EditHeader2 extends StatelessWidget {
   }
 }
 
+class _DateSelector extends StatefulWidget {
+  final DateTime date;
+  final ValueChanged<DateTime>? onChanged;
+
+  const _DateSelector({required this.date, this.onChanged});
+
+  @override
+  State<StatefulWidget> createState() => _DateSelectorState();
+}
+
+class _DateSelectorState extends State<_DateSelector> {
+  late DateTime _date;
+
+  @override
+  void initState() {
+    super.initState();
+    _date = widget.date;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        _showDatePicker(context);
+      },
+      child: Text(
+        _formatData(_date),
+        style: const TextStyle(
+          fontSize: 18,
+        ),
+      ),
+    );
+  }
+
+  static List<String> months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  _formatData(DateTime date) {
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
+  _showDatePicker(BuildContext context) async {
+    final res = await showDatePicker(
+      context: context,
+      initialDate: _date,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+    if (res != null) {
+      setState(() {
+        _date = res;
+        widget.onChanged?.call(res);
+      });
+    }
+  }
+}
+
+class _TimeSelector extends StatefulWidget {
+  final DateTime time;
+  final ValueChanged<TimeOfDay>? onChanged;
+
+  const _TimeSelector({required this.time, this.onChanged});
+
+  @override
+  State<StatefulWidget> createState() => _TimeSelectorState();
+}
+
+class _TimeSelectorState extends State<_TimeSelector> {
+  late TimeOfDay _time;
+
+  @override
+  void initState() {
+    super.initState();
+    _time = TimeOfDay.fromDateTime(widget.time);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        _showTimePicker(context);
+      },
+      child: Text(
+        _formatTime(_time),
+        style: const TextStyle(
+          fontSize: 16,
+        ),
+      ),
+    );
+  }
+
+  _formatTime(TimeOfDay time) {
+    return '${time.hour}:${time.minute}';
+  }
+
+  _showTimePicker(BuildContext context) async {
+    final res = await showTimePicker(
+      context: context,
+      initialTime: _time,
+    );
+    if (res != null) {
+      setState(() {
+        _time = res;
+        widget.onChanged?.call(res);
+      });
+    }
+  }
+}
+
 class _EmotionSelector extends StatefulWidget {
   final int? emotionIndex;
+  final ValueChanged<int>? onChanged;
 
-  const _EmotionSelector({this.emotionIndex});
+  const _EmotionSelector({this.emotionIndex, this.onChanged});
 
   @override
   State<StatefulWidget> createState() => _EmotionSelectorState();
@@ -148,6 +305,7 @@ class _EmotionSelectorState extends State<_EmotionSelector> {
     if (res != null && res is int) {
       setState(() {
         _index = res;
+        widget.onChanged?.call(res);
       });
     }
   }
