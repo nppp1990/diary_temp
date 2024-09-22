@@ -9,11 +9,11 @@ class EmphasizeContainer extends StatefulWidget {
 
   const EmphasizeContainer({
     super.key,
-    required this.child,
     required this.controller,
     required this.haloSize,
     required this.haloColor,
     this.shape = BoxShape.circle,
+    required this.child,
   });
 
   // final AnimationController controller;
@@ -32,12 +32,6 @@ class _EmphasizeContainerState extends State<EmphasizeContainer> {
       parent: widget.controller,
       curve: Curves.easeInOut,
     ));
-  }
-
-  @override
-  void dispose() {
-    widget.controller.dispose();
-    super.dispose();
   }
 
   @override

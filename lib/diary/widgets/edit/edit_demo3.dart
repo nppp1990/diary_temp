@@ -4,6 +4,7 @@ import 'package:dribbble/diary/utils/keyboard.dart';
 import 'package:dribbble/diary/widgets/bg_page.dart';
 import 'package:dribbble/diary/widgets/edit/header/edit_header.dart';
 import 'package:dribbble/diary/widgets/edit/toolbar/background/background_selector.dart';
+import 'package:dribbble/diary/widgets/edit/toolbar/template/template_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -31,12 +32,17 @@ class TestEdit extends StatefulWidget {
 
 class TestEditState extends State<TestEdit> {
   final QuillController controller = QuillController.basic();
+  final FocusNode _focusNode = FocusNode();
+
   final BackgroundController backgroundController = BackgroundController();
 
   // late bool _showColorDialog;
   late ValueNotifier<bool> _showColorDialogNotifier;
   late ValueNotifier<bool> _showBackgroundDialogNotifier;
   late ValueNotifier<bool> _showEmotionDialogNotifier;
+
+  final GlobalKey<ToolbarTemplateItemState> _templateItemKey = GlobalKey();
+  bool _hasShowTemplateTips = false;
 
   @override
   void initState() {
@@ -46,6 +52,25 @@ class TestEditState extends State<TestEdit> {
     _showBackgroundDialogNotifier = ValueNotifier<bool>(false);
     _showEmotionDialogNotifier = ValueNotifier<bool>(false);
     _formatTitle();
+    _focusNode.addListener(_focusChanged);
+  }
+
+  void _focusChanged() {
+    final hasFocus = _focusNode.hasFocus;
+    if (hasFocus &&
+        !_hasShowTemplateTips &&
+        controller.document.isEmpty() &&
+        !_showColorDialogNotifier.value &&
+        !_showBackgroundDialogNotifier.value &&
+        !_showEmotionDialogNotifier.value) {
+      // 2秒后如果还没有输入内容，显示模板提示
+      Future.delayed(const Duration(seconds: 2), () {
+        if (controller.document.isEmpty()) {
+          _templateItemKey.currentState!.showBubbleDialog(true);
+          _hasShowTemplateTips = true;
+        }
+      });
+    }
   }
 
   @override
@@ -53,6 +78,8 @@ class TestEditState extends State<TestEdit> {
     _showColorDialogNotifier.dispose();
     _showBackgroundDialogNotifier.dispose();
     _showEmotionDialogNotifier.dispose();
+    _focusNode.removeListener(_focusChanged);
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -88,7 +115,7 @@ class TestEditState extends State<TestEdit> {
                     const EditHeader1(),
                     EditHeader2(
                       date: DateTime.now(),
-                      emotionIndex: 0,
+                      emotionIndex: null,
                       onDateChanged: (date) {
                         // year, month, day hh:mm
                         print('----date: $date');
@@ -101,6 +128,7 @@ class TestEditState extends State<TestEdit> {
                     Expanded(
                       child: QuillEditor.basic(
                         controller: controller,
+                        focusNode: _focusNode,
                         configurations: const QuillEditorConfigurations(
                           padding: EdgeInsets.all(TestConfiguration.editorPadding),
                           placeholder: 'title',
@@ -109,7 +137,10 @@ class TestEditState extends State<TestEdit> {
                         ),
                       ),
                     ),
-                    Toolbar(controller: controller),
+                    Toolbar(
+                      controller: controller,
+                      templateItemKey: _templateItemKey,
+                    ),
                   ],
                 ),
                 ValueListenableBuilder<bool>(

@@ -5,6 +5,7 @@ import 'package:dribbble/diary/common/test_configuration.dart';
 import 'package:dribbble/diary/utils/keyboard.dart';
 import 'package:dribbble/diary/widgets/edit/edit_demo3.dart';
 import 'package:dribbble/diary/widgets/edit/toolbar/history.dart';
+import 'package:dribbble/diary/widgets/edit/toolbar/template/template_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -15,8 +16,9 @@ import 'text/text_box.dart';
 
 class Toolbar extends StatefulWidget {
   final QuillController controller;
+  final GlobalKey templateItemKey;
 
-  const Toolbar({super.key, required this.controller});
+  const Toolbar({super.key, required this.controller, required this.templateItemKey});
 
   @override
   State<StatefulWidget> createState() => _ToolbarState();
@@ -72,8 +74,7 @@ class _ToolbarState extends State<Toolbar> {
             color: TestColors.toolBarBackground,
             child: Row(
               children: [
-                _buildToolbarButton('assets/icons/ic_template.svg', controller, false, () {
-                }),
+                Expanded(child: ToolbarTemplateItem(key: widget.templateItemKey, onTap: () {})),
                 _buildToolbarButton('assets/icons/ic_background.svg', controller, false, () {
                   KeyboardUtils.hideKeyboard(context);
                   ToolBarDialogProvider.of(context).showBackgroundDialog(true);

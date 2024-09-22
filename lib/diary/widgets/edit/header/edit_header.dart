@@ -59,14 +59,14 @@ class EditHeader1 extends StatelessWidget {
 
 class EditHeader2 extends StatefulWidget {
   final DateTime date;
-  final int emotionIndex;
+  final int? emotionIndex;
   final ValueChanged<DateTime>? onDateChanged;
   final ValueChanged<int>? onEmotionChanged;
 
   const EditHeader2({
     super.key,
     required this.date,
-    required this.emotionIndex,
+    this.emotionIndex,
     this.onDateChanged,
     this.onEmotionChanged,
   });
@@ -253,7 +253,6 @@ class _EmotionSelector extends StatefulWidget {
 class _EmotionSelectorState extends State<_EmotionSelector> with SingleTickerProviderStateMixin {
   late int? _index;
   late AnimationController _controller;
-
 
   @override
   void initState() {
