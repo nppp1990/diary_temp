@@ -1,8 +1,9 @@
 import 'dart:ui';
 
 abstract class TestColors {
-  static const Color primary = Color(0xFF9D53E4);
-  static const Color second = Color(0xFF30C693);
+  static const Color primary = Color(0xFF5735EB);
+  static const Color second = Color(0xFF0BD77B);
+  static const Color third = Color(0xFFFBDF3C);
 
   static const Color black1 = Color(0xFF2C2C2C);
   static const Color toolBarBackground = Color(0xFFF7F7F7);

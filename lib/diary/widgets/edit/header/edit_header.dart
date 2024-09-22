@@ -1,6 +1,7 @@
 import 'package:dribbble/diary/common/test_colors.dart';
 import 'package:dribbble/diary/common/test_configuration.dart';
 import 'package:dribbble/diary/widgets/bubble.dart';
+import 'package:dribbble/diary/widgets/emphasize.dart';
 import 'package:dribbble/diary/widgets/icon/arrow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -249,13 +250,19 @@ class _EmotionSelector extends StatefulWidget {
   State<StatefulWidget> createState() => _EmotionSelectorState();
 }
 
-class _EmotionSelectorState extends State<_EmotionSelector> {
+class _EmotionSelectorState extends State<_EmotionSelector> with SingleTickerProviderStateMixin {
   late int? _index;
+  late AnimationController _controller;
+
 
   @override
   void initState() {
     super.initState();
     _index = widget.emotionIndex;
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
     if (_index == null) {
       // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       //   _showBubbleGuideDialog(context);
@@ -268,6 +275,12 @@ class _EmotionSelectorState extends State<_EmotionSelector> {
     }
   }
 
+  @override
+  dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   List<String> get emotions => TestConfiguration.moodImages;
 
   @override
@@ -277,10 +290,15 @@ class _EmotionSelectorState extends State<_EmotionSelector> {
       onTap: () {
         _showBubbleGuideDialog(context);
       },
-      child: SvgPicture.asset(
-        emotions[_index ?? 0],
-        width: TestConfiguration.editHeaderItemSize,
-        height: TestConfiguration.editHeaderItemSize,
+      child: EmphasizeContainer(
+        controller: _controller,
+        haloColor: TestColors.primary.withOpacity(0.2),
+        haloSize: 10,
+        child: SvgPicture.asset(
+          emotions[_index ?? 0],
+          width: TestConfiguration.editHeaderItemSize,
+          height: TestConfiguration.editHeaderItemSize,
+        ),
       ),
     );
   }
@@ -290,7 +308,7 @@ class _EmotionSelectorState extends State<_EmotionSelector> {
     final Offset offset = renderBox.localToGlobal(Offset.zero);
     var screenWidth = MediaQuery.sizeOf(context).width;
     final triangleOffset = screenWidth - offset.dx - TestConfiguration.editHeaderPadding - 10;
-
+    _controller.repeat(reverse: true);
     var res = await showDialog(
       context: context,
       useSafeArea: false,
@@ -302,6 +320,8 @@ class _EmotionSelectorState extends State<_EmotionSelector> {
         );
       },
     );
+    _controller.stop();
+    _controller.reset();
     if (res != null && res is int) {
       setState(() {
         _index = res;
