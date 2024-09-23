@@ -1,4 +1,6 @@
 abstract class TestConfiguration {
+  static const double pagePadding = 20;
+
   static const double editorPadding = 16.0;
   static const double toolBarHeight = 48.0;
   static const double toolBarIconSize = 24.0;

@@ -49,6 +49,7 @@ dependencies:
   flutter_keyboard_visibility: ^6.0.0
   super_clipboard: ^0.8.22
   star_menu: ^4.0.1
+  pageviewj: ^0.0.3
 
 
 dev_dependencies:

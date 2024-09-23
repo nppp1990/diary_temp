@@ -390,6 +390,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.15.0"
+  pageviewj:
+    dependency: "direct main"
+    description:
+      name: pageviewj
+      sha256: cc5c9098338871b922e2d145b01adb644a141848ec8d2113f5959c1b0f2f1840
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.3"
   path:
     dependency: transitive
     description:

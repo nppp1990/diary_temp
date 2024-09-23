@@ -4,6 +4,7 @@ import 'package:dribbble/clock/clock1/wheel/test_list_wheell.dart';
 import 'package:dribbble/diary/button1.dart';
 import 'package:dribbble/diary/widgets/edit/edit_demo2.dart';
 import 'package:dribbble/diary/widgets/edit/edit_demo3.dart';
+import 'package:dribbble/diary/widgets/emotion/edit_mood.dart';
 import 'package:dribbble/diary/widgets/emotion/emotion_list.dart';
 import 'package:dribbble/diary/widgets/menu/home.dart';
 import 'package:dribbble/diary/widgets/page_turn.dart';
@@ -124,6 +125,12 @@ class _MyHomePageState extends State<MyHomePage> {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    }),
+    ListItem('edit emotion', (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const EditMoodPage()),
       );
     }),
   ];

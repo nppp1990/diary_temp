@@ -42,6 +42,7 @@ class BubbleBorder extends StatelessWidget {
         break;
       case TriangleDirection.topStart:
       case TriangleDirection.topEnd:
+      case TriangleDirection.topCenter:
         padding = EdgeInsets.only(top: triangleHeight);
         break;
     }
@@ -70,6 +71,7 @@ enum TriangleDirection {
   bottomStart,
   bottomEnd,
   topStart,
+  topCenter,
   topEnd,
 }
 
@@ -184,6 +186,15 @@ class BubbleBorderPainter extends CustomPainter {
           Rect.fromLTWH(0, triangleHeight, size.width, size.height - triangleHeight),
           Radius.circular(borderRadius),
         ));
+        case TriangleDirection.topCenter:
+          arrowPath.moveTo(size.width / 2 - triangleWidth / 2, triangleHeight);
+          arrowPath.lineTo(size.width / 2, 0);
+          arrowPath.lineTo(size.width / 2 + triangleWidth / 2, triangleHeight);
+          arrowPath.close();
+          rectPath.addRRect(RRect.fromRectAndRadius(
+            Rect.fromLTWH(0, triangleHeight, size.width, size.height - triangleHeight),
+            Radius.circular(borderRadius),
+          ));
         break;
     }
 
