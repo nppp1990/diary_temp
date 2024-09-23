@@ -5,6 +5,7 @@ import 'package:dribbble/diary/button1.dart';
 import 'package:dribbble/diary/widgets/edit/edit_demo2.dart';
 import 'package:dribbble/diary/widgets/edit/edit_demo3.dart';
 import 'package:dribbble/diary/widgets/emotion/emotion_list.dart';
+import 'package:dribbble/diary/widgets/menu/home.dart';
 import 'package:dribbble/diary/widgets/page_turn.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -115,8 +116,16 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       );
     }),
-    ListItem('test emotion', (context) => Navigator.push(context, MaterialPageRoute(builder: (context) => const EmotionTestPage())),
+    ListItem(
+      'test emotion',
+      (context) => Navigator.push(context, MaterialPageRoute(builder: (context) => const EmotionTestPage())),
     ),
+    ListItem('test home', (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    }),
   ];
 
   @override
@@ -131,15 +140,12 @@ class _MyHomePageState extends State<MyHomePage> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _init();
     });
-
   }
 
   _init() async {
     precacheImage(const AssetImage('assets/images/bg_base1.png'), context);
     precacheImage(const AssetImage('assets/images/bg_base2.png'), context);
   }
-
-
 
   @override
   Widget build(BuildContext context) {

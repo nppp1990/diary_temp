@@ -17,11 +17,12 @@ class BackgroundSelector extends StatefulWidget {
 final List<BackgroundInfo?> _backgroundList = [
   null,
   const BackgroundInfo(backgroundColor: Color(0xFFF8F8F8)),
-  const BackgroundInfo(backgroundColor: Color(0xFFEBF9EB)),
   const BackgroundInfo(backgroundColor: Color(0xFFD8E6E8)),
+  const BackgroundInfo(backgroundColor: Color(0xFFD2C6B1)),
+  const BackgroundInfo(backgroundColor: Color(0xFFCACFCA)),
+  const BackgroundInfo(backgroundColor: Color(0xFFEEFEE4)),
   const BackgroundInfo(backgroundColor: Color(0xFF395C78)),
   const BackgroundInfo(backgroundColor: Color(0xFF4CA477)),
-  const BackgroundInfo(backgroundColor: Color(0xFF020202)),
   const BackgroundInfo(assetImage: AssetImage('assets/images/bg_base1.png')),
   const BackgroundInfo(assetImage: AssetImage('assets/images/bg_base2.png')),
 ];
