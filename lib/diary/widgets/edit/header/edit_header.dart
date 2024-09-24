@@ -266,7 +266,7 @@ class _EmotionSelectorState extends State<_EmotionSelector> with SingleTickerPro
       // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       //   _showBubbleGuideDialog(context);
       // });
-      Future.delayed(const Duration(milliseconds: 1000), () {
+      Future.delayed(const Duration(milliseconds: 300), () {
         if (context.mounted) {
           _showBubbleGuideDialog(context);
         }
@@ -280,7 +280,7 @@ class _EmotionSelectorState extends State<_EmotionSelector> with SingleTickerPro
     super.dispose();
   }
 
-  List<String> get emotions => TestConfiguration.moodImages;
+  List<String> get emotions => TestConfiguration.moodImagesForToolbar;
 
   @override
   Widget build(BuildContext context) {
@@ -337,9 +337,9 @@ class EmotionBubbleDialog extends StatelessWidget {
 
   const EmotionBubbleDialog({super.key, required this.top, required this.right, required this.triangleOffset});
 
-  List<String> get emotions => TestConfiguration.moodImages;
+  List<String> get emotions => TestConfiguration.moodImagesForToolbar;
 
-  List<String> get emotionTexts => TestConfiguration.moodTexts;
+  List<String> get emotionTexts => TestConfiguration.moodTextsForToolbar;
 
   @override
   Widget build(BuildContext context) {

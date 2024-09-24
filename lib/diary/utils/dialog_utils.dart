@@ -22,6 +22,7 @@ abstract class DialogUtils {
           ),
           child: Container(
             width: double.infinity,
+            // width: 450,
             // height: 300,
             decoration: BoxDecoration(
               color: Colors.white,
@@ -92,13 +93,6 @@ abstract class DialogUtils {
                             ),
                           ),
                         ),
-                        // TextButton(
-                        //   onPressed: () {
-                        //     Navigator.of(context).pop();
-                        //     onConfirm();
-                        //   },
-                        //   child: const Text('确定'),
-                        // ),
                       ],
                     ),
                   ]),

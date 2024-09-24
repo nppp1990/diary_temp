@@ -84,10 +84,6 @@ class TemplateTipBubble extends StatelessWidget {
 
   const TemplateTipBubble({super.key, required this.triangleOffset});
 
-  List<String> get emotions => TestConfiguration.moodImages;
-
-  List<String> get emotionTexts => TestConfiguration.moodTexts;
-
   @override
   Widget build(BuildContext context) {
     return AnimatedOpacity(

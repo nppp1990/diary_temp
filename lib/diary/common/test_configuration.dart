@@ -12,6 +12,8 @@ abstract class TestConfiguration {
   static const double editHeaderPadding = 20.0;
   static const double editHeaderItemSize = 36.0;
 
+  static const double templateItemHeight = 110;
+
   static const double t1 = 24;
   static const double t2 = 20;
   static const double t3 = 16;
@@ -19,8 +21,18 @@ abstract class TestConfiguration {
   static const double t5 = 12;
   static const double t6 = 10;
 
-  //
-  static const List<String> moodImages = [
+  // static const List<int> editToolBarMoodList = [
+  //   4, // relaxed
+  //   5, // happy
+  //   6, // excited
+  //   7, // laugh
+  //   0, // angry
+  //   1, // frustrated
+  //   2, // worried
+  //   3, // sad
+  // ];
+
+  static const List<String> moodImagesForToolbar = [
     'assets/images/emotion_relaxed.svg',
     'assets/images/emotion_happy.svg',
     'assets/images/emotion_excited.svg',
@@ -31,7 +43,7 @@ abstract class TestConfiguration {
     'assets/images/emotion_angry.svg',
   ];
 
-  static const List<String> moodTexts = [
+  static const List<String> moodTextsForToolbar = [
     'Relaxed',
     'Happy',
     'Excited',
@@ -40,6 +52,29 @@ abstract class TestConfiguration {
     'Worried',
     'Frustrated',
     'Angry',
+  ];
+
+  //
+  static const List<String> moodImages = [
+    'assets/images/emotion_angry.svg',
+    'assets/images/emotion_frustrated.svg',
+    'assets/images/emotion_worried.svg',
+    'assets/images/emotion_sad.svg',
+    'assets/images/emotion_relaxed.svg',
+    'assets/images/emotion_happy.svg',
+    'assets/images/emotion_excited.svg',
+    'assets/images/emotion_laugh.svg',
+  ];
+
+  static const List<String> moodTexts = [
+    'Angry',
+    'Frustrated',
+    'Worried',
+    'Sad',
+    'Relaxed',
+    'Happy',
+    'Excited',
+    'Laugh',
   ];
 
 }
