@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dribbble/diary/common/test_colors.dart';
 import 'package:dribbble/diary/common/test_configuration.dart';
+import 'package:dribbble/diary/utils/dialog_utils.dart';
 import 'package:dribbble/diary/utils/keyboard.dart';
 import 'package:dribbble/diary/widgets/edit/edit_demo3.dart';
 import 'package:dribbble/diary/widgets/edit/toolbar/history.dart';
@@ -74,7 +75,11 @@ class _ToolbarState extends State<Toolbar> {
             color: TestColors.toolBarBackground,
             child: Row(
               children: [
-                Expanded(child: ToolbarTemplateItem(key: widget.templateItemKey, onTap: () {})),
+                Expanded(child: ToolbarTemplateItem(key: widget.templateItemKey, onTap: () {
+                  DialogUtils.showConfirmDialog(context, 'test', 'content', () {
+                    print('----confirm');
+                  });
+                })),
                 _buildToolbarButton('assets/icons/ic_background.svg', controller, false, () {
                   KeyboardUtils.hideKeyboard(context);
                   ToolBarDialogProvider.of(context).showBackgroundDialog(true);

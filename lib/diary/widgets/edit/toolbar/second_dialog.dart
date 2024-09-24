@@ -1,6 +1,5 @@
 import 'package:dribbble/diary/common/test_colors.dart';
 import 'package:dribbble/diary/common/test_configuration.dart';
-import 'package:dribbble/diary/widgets/edit/edit_demo3.dart';
 import 'package:dribbble/diary/widgets/icon/arrow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';

@@ -118,8 +118,9 @@ class TestChild extends StatelessWidget {
 
 class MemphisCard extends StatelessWidget {
   final Widget child;
+  final double height;
 
-  const MemphisCard({super.key, required this.child});
+  const MemphisCard({super.key, required this.child, this.height = 100});
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +137,7 @@ class MemphisCard extends StatelessWidget {
       ],
     );
     return Container(
-      height: 100,
+      height: height,
       decoration: decoration,
       child: child,
     );
