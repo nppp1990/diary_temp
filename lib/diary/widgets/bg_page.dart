@@ -9,29 +9,6 @@ class BackgroundController {
   }) : backgroundInfo = ValueNotifier(info);
 
   void changeBackground(BackgroundInfo? info) {
-    // if (info == null) {
-    //   SystemChrome.setSystemUIOverlayStyle(
-    //     const SystemUiOverlayStyle(
-    //       statusBarColor: Colors.white,
-    //       systemNavigationBarColor: Colors.white,
-    //     ),
-    //   );
-    // } else if (info.isColor) {
-    //   SystemChrome.setSystemUIOverlayStyle(
-    //     SystemUiOverlayStyle(
-    //       // statusBarColor: info.backgroundColor,
-    //       statusBarColor: Colors.transparent,
-    //       systemNavigationBarColor: Colors.white,
-    //     ),
-    //   );
-    // } else {
-    //   SystemChrome.setSystemUIOverlayStyle(
-    //     const SystemUiOverlayStyle(
-    //       statusBarColor: Colors.transparent,
-    //       systemNavigationBarColor: Colors.transparent,
-    //     ),
-    //   );
-    // }
     backgroundInfo.value = info;
   }
 }
@@ -49,8 +26,14 @@ class BackgroundInfo {
 class PageBackground extends StatefulWidget {
   final Widget child;
   final BackgroundController controller;
+  final PreferredSizeWidget? appBar;
 
-  const PageBackground({super.key, required this.controller, required this.child});
+  const PageBackground({
+    super.key,
+    required this.controller,
+    this.appBar,
+    required this.child,
+  });
 
   @override
   State<StatefulWidget> createState() => _PageBackgroundState();
@@ -60,28 +43,13 @@ class _PageBackgroundState extends State<PageBackground> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         systemNavigationBarColor: Colors.transparent,
       ),
     );
-    // final BackgroundInfo? info = widget.controller.backgroundInfo.value;
-    // if (info == null || info.isColor) {
-    //   SystemChrome.setSystemUIOverlayStyle(
-    //     SystemUiOverlayStyle(
-    //       statusBarColor: info?.backgroundColor ?? Colors.white,
-    //       systemNavigationBarColor: info?.systemNavigationBarColor ?? Colors.white,
-    //     ),
-    //   );
-    // } else {
-    //   SystemChrome.setSystemUIOverlayStyle(
-    //     const SystemUiOverlayStyle(
-    //       statusBarColor: Colors.transparent,
-    //       systemNavigationBarColor: Colors.transparent,
-    //     ),
-    //   );
-    // }
   }
 
   @override
@@ -95,12 +63,21 @@ class _PageBackgroundState extends State<PageBackground> {
             body: Container(
               decoration: BoxDecoration(
                 color: isColorBackground ? info?.backgroundColor ?? Colors.white : null,
-                image: isColorBackground ? null : DecorationImage(
-                  image: info.assetImage!,
-                  fit: BoxFit.cover,
-                ),
+                image: isColorBackground
+                    ? null
+                    : DecorationImage(
+                        image: info.assetImage!,
+                        fit: BoxFit.cover,
+                      ),
               ),
-              child: child,
+              child: Column(
+                children: [
+                  if (widget.appBar != null) widget.appBar!,
+                  Expanded(
+                    child: child!,
+                  ),
+                ],
+              ),
             ),
           );
         },

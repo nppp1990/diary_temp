@@ -170,127 +170,141 @@ class TestEditState extends State<TestEdit> {
   }
 
   @override
-  void deactivate() {
-    super.deactivate();
-    print('----deactivate demo3');
-  }
-
-  @override
-  void activate() {
-    super.activate();
-    print('----activate demo3');
-  }
-
-  @override
   Widget build(BuildContext context) {
     print('----build demo3');
     return ToolBarDialogProvider(
-      state: this,
-      child: PageBackground(
+        state: this,
+        child: PageBackground(
           controller: backgroundController,
-          child: SafeArea(
-            child: KeyboardVisibilityProvider(
-              child: Stack(children: [
-                Column(
-                  children: [
-                    const EditHeader1(),
-                    EditHeader2(
-                      date: DateTime.now(),
-                      emotionIndex: null,
-                      onDateChanged: (date) {
-                        // year, month, day hh:mm
-                        print('----date: $date');
-                        _saveDoc();
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            iconTheme: const IconThemeData(color: TestColors.black1, size: 28),
+            title: const Text('Edit'),
+            actions: [
+              PopupMenuButton(
+                icon: const Icon(Icons.more_vert),
+                itemBuilder: (context) {
+                  return [
+                    PopupMenuItem(
+                      onTap: () {
+                        // Navigator.pop(context);
                       },
-                      onEmotionChanged: (index) {
-                        print('----emotion: $index');
-                        _loadDoc(_testJson);
-                      },
+                      child: const Text('item1'),
                     ),
-                    Container(height: 1, color: TestColors.greyDivider1),
-                    Expanded(
-                      child: QuillEditor.basic(
-                        controller: controller,
-                        focusNode: _focusNode,
-                        configurations: const QuillEditorConfigurations(
-                          padding: EdgeInsets.all(TestConfiguration.editorPadding),
-                          placeholder: 'title',
-                          // expands: true,
-                          paintCursorAboveText: true,
-                        ),
+                    const PopupMenuItem(
+                      child: Text('item2'),
+                    ),
+                  ];
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.check),
+                onPressed: () {
+                  _saveDoc();
+                },
+              ),
+            ],
+          ),
+          child: KeyboardVisibilityProvider(
+            child: Stack(children: [
+              Column(
+                children: [
+                  EditHeader2(
+                    date: DateTime.now(),
+                    emotionIndex: null,
+                    onDateChanged: (date) {
+                      // year, month, day hh:mm
+                      print('----date: $date');
+                      _saveDoc();
+                    },
+                    onEmotionChanged: (index) {
+                      print('----emotion: $index');
+                      _loadDoc(_testJson);
+                    },
+                  ),
+                  Container(height: 1, color: TestColors.greyDivider1),
+                  Expanded(
+                    child: QuillEditor.basic(
+                      controller: controller,
+                      focusNode: _focusNode,
+                      configurations: const QuillEditorConfigurations(
+                        padding: EdgeInsets.all(TestConfiguration.editorPadding),
+                        placeholder: 'title',
+                        // expands: true,
+                        paintCursorAboveText: true,
                       ),
                     ),
-                    Toolbar(
-                      controller: controller,
-                      templateItemKey: _templateItemKey,
-                    ),
-                  ],
-                ),
-                ValueListenableBuilder<bool>(
-                  valueListenable: _showColorDialogNotifier,
-                  builder: (context, show, child) {
-                    return show
-                        ? SecondDialog(
-                            title: 'Color',
-                            child: ColorSelectDialog(
-                              controller: controller,
-                            ),
-                            onDismiss: () {
-                              showColorDialog(false);
-                              KeyboardUtils.showKeyboardByChannel();
+                  ),
+                  Toolbar(
+                    controller: controller,
+                    templateItemKey: _templateItemKey,
+                  ),
+                ],
+              ),
+              ValueListenableBuilder<bool>(
+                valueListenable: _showColorDialogNotifier,
+                builder: (context, show, child) {
+                  return show
+                      ? SecondDialog(
+                          title: 'Color',
+                          child: ColorSelectDialog(
+                            controller: controller,
+                          ),
+                          onDismiss: () {
+                            showColorDialog(false);
+                            KeyboardUtils.showKeyboardByChannel();
+                          },
+                        )
+                      : const SizedBox.shrink();
+                },
+              ),
+              ValueListenableBuilder<bool>(
+                valueListenable: _showBackgroundDialogNotifier,
+                builder: (context, show, child) {
+                  return show
+                      ? SecondDialog(
+                          title: 'Background',
+                          child: BackgroundSelector(
+                            controller: backgroundController,
+                          ),
+                          onDismiss: () {
+                            showBackgroundDialog(false);
+                          },
+                        )
+                      : const SizedBox.shrink();
+                },
+              ),
+              ValueListenableBuilder<bool>(
+                valueListenable: _showEmotionDialogNotifier,
+                builder: (context, show, child) {
+                  return show
+                      ? SecondDialog(
+                          title: 'Emotion',
+                          child: EmotionSelector(
+                            onEmotionSelected: (emoji) {
+                              // showEmotionDialog(false);
+                              final int index = controller.selection.baseOffset;
+                              controller.skipRequestKeyboard = true;
+                              controller.replaceText(
+                                  index, 0, emoji, TextSelection.collapsed(offset: index + emoji.length));
+                              KeyboardUtils.hideKeyboardByChannel();
                             },
-                          )
-                        : const SizedBox.shrink();
-                  },
-                ),
-                ValueListenableBuilder<bool>(
-                  valueListenable: _showBackgroundDialogNotifier,
-                  builder: (context, show, child) {
-                    return show
-                        ? SecondDialog(
-                            title: 'Background',
-                            child: BackgroundSelector(
-                              controller: backgroundController,
-                            ),
-                            onDismiss: () {
-                              showBackgroundDialog(false);
-                            },
-                          )
-                        : const SizedBox.shrink();
-                  },
-                ),
-                ValueListenableBuilder<bool>(
-                  valueListenable: _showEmotionDialogNotifier,
-                  builder: (context, show, child) {
-                    return show
-                        ? SecondDialog(
-                            title: 'Emotion',
-                            child: EmotionSelector(
-                              onEmotionSelected: (emoji) {
-                                // showEmotionDialog(false);
-                                final int index = controller.selection.baseOffset;
-                                controller.skipRequestKeyboard = true;
-                                controller.replaceText(
-                                    index, 0, emoji, TextSelection.collapsed(offset: index + emoji.length));
-                                KeyboardUtils.hideKeyboardByChannel();
-                              },
-                            ),
-                            onDismiss: () {
-                              showEmotionDialog(false);
-                              // 显示键盘+光标
-                              controller.replaceText(controller.selection.baseOffset, 0, '', null);
-                              // KeyboardUtils.showKeyboard(context);
-                              // KeyboardUtils.showKeyboardByChannel();
-                            },
-                          )
-                        : const SizedBox.shrink();
-                  },
-                ),
-                // if (_showColorDialog)
-              ]),
-            ),
-          )),
-    );
+                          ),
+                          onDismiss: () {
+                            showEmotionDialog(false);
+                            // 显示键盘+光标
+                            controller.replaceText(controller.selection.baseOffset, 0, '', null);
+                            // KeyboardUtils.showKeyboard(context);
+                            // KeyboardUtils.showKeyboardByChannel();
+                          },
+                        )
+                      : const SizedBox.shrink();
+                },
+              ),
+              // if (_showColorDialog)
+            ]),
+          ),
+        ));
   }
 }
 
