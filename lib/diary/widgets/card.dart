@@ -89,12 +89,15 @@ class DashOffsetCard extends StatelessWidget {
 }
 
 class RotateCard extends StatelessWidget {
-  final Widget child;
+  final double? cardHeight;
   final BoxDecoration decoration;
   final double angle;
+  final Widget child;
+
 
   const RotateCard({
     super.key,
+    this.cardHeight,
     required this.decoration,
     this.angle = -2 / 180 * pi,
     required this.child,
@@ -102,16 +105,28 @@ class RotateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Stack(
+    if (cardHeight == null) {
+      return IntrinsicHeight(
+        child: Stack(
+          children: [
+            Transform.rotate(
+              angle: angle,
+              child: Container(decoration: decoration),
+            ),
+            child,
+          ],
+        ),
+      );
+    } else {
+      return Stack(
         children: [
           Transform.rotate(
             angle: angle,
-            child: Container(decoration: decoration),
+            child: Container(decoration: decoration, height: cardHeight),
           ),
           child,
         ],
-      ),
-    );
+      );
+    }
   }
 }

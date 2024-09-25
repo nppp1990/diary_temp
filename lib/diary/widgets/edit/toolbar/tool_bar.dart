@@ -37,11 +37,20 @@ class _ToolbarState extends State<Toolbar> {
   void initState() {
     super.initState();
     keyboardSubscription = KeyboardVisibilityController().onChange.listen((bool visible) {
+      if (!context.mounted) {
+        return;
+      }
+
+      print('-----keyboard visible: $visible, isCurrent: ${ModalRoute.of(context)!.isCurrent}');
+
       if (visible) {
         if (!_showToolBar) {
-          setState(() {
-            _showToolBar = true;
-          });
+          final isCurrentPage = ModalRoute.of(context)?.isCurrent ?? false;
+          if (isCurrentPage) {
+            setState(() {
+              _showToolBar = true;
+            });
+          }
         }
       } else {
         if (_showToolBar) {
@@ -54,11 +63,26 @@ class _ToolbarState extends State<Toolbar> {
     });
   }
 
+
   @override
   void dispose() {
     keyboardSubscription.cancel();
     super.dispose();
   }
+
+  @override
+  void activate() {
+    super.activate();
+    print('-----activate toolbar');
+  }
+
+  @override
+  void deactivate() {
+    super.deactivate();
+    print('-----deactivate toolbar');
+  }
+
+
 
   @override
   Widget build(BuildContext context) {

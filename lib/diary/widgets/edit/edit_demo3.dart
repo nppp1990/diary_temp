@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:dribbble/diary/bean/template_add_dialog.dart';
 import 'package:dribbble/diary/common/test_colors.dart';
 import 'package:dribbble/diary/common/test_configuration.dart';
 import 'package:dribbble/diary/utils/keyboard.dart';
@@ -8,6 +11,7 @@ import 'package:dribbble/diary/widgets/edit/toolbar/template/template_item.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill/quill_delta.dart';
 
 import 'toolbar/color/color_toolbar_item.dart';
 import 'toolbar/emotion/emotion_selector.dart';
@@ -65,8 +69,8 @@ class TestEditState extends State<TestEdit> {
         !_showEmotionDialogNotifier.value) {
       // 2秒后如果还没有输入内容，显示模板提示
       Future.delayed(const Duration(seconds: 2), () {
-        if (controller.document.isEmpty()) {
-          _templateItemKey.currentState!.showBubbleDialog(true);
+        if (controller.document.isEmpty() && _templateItemKey.currentState != null) {
+          _templateItemKey.currentState?.showBubbleDialog(true);
           _hasShowTemplateTips = true;
         }
       });
@@ -100,6 +104,83 @@ class TestEditState extends State<TestEdit> {
     controller.formatText(0, 1, Attribute.h2);
   }
 
+  String? _testJson = null;
+
+  void _saveDoc() {
+    // controller.getPlainText();
+
+    final delta = controller.document.toDelta();
+    final json = jsonEncode(delta.toJson());
+
+    String allText = '';
+
+    for (final op in delta.operations) {
+      if (op.isInsert) {
+        allText += op.value;
+        print('----insert: ${op.value}');
+      } else {
+        print('----retain: ${op.length}');
+      }
+    }
+
+    print('----allText: $allText');
+
+    final text = controller.getPlainText();
+    print('----text: $text');
+
+    print('----json: $json');
+
+    print('----first text: ${getFirstText(controller)}');
+    _testJson = json;
+    TemplateAddDialog.show(
+      context,
+      color: Colors.yellow,
+      content: allText,
+      title: getFirstText(controller),
+    );
+  }
+
+  String _getPlainTextFromJson(String deltaJson) {
+    final delta = Delta.fromJson(jsonDecode(deltaJson));
+    String allText = '';
+    for (final op in delta.operations) {
+      if (op.isInsert) {
+        allText += op.value;
+      }
+    }
+    return allText;
+  }
+
+  void _loadDoc(String? json) {
+    if (json == null) {
+      return;
+    }
+    controller.document = Document.fromJson(jsonDecode(json));
+  }
+
+  String getFirstText(QuillController controller) {
+    if (controller.document.isEmpty()) {
+      return '';
+    }
+    final firstLeaf = controller.document.root.children.first;
+    if (firstLeaf is Line) {
+      return firstLeaf.toPlainText();
+    }
+    return '';
+  }
+
+  @override
+  void deactivate() {
+    super.deactivate();
+    print('----deactivate demo3');
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    print('----activate demo3');
+  }
+
   @override
   Widget build(BuildContext context) {
     print('----build demo3');
@@ -119,9 +200,11 @@ class TestEditState extends State<TestEdit> {
                       onDateChanged: (date) {
                         // year, month, day hh:mm
                         print('----date: $date');
+                        _saveDoc();
                       },
                       onEmotionChanged: (index) {
                         print('----emotion: $index');
+                        _loadDoc(_testJson);
                       },
                     ),
                     Container(height: 1, color: TestColors.greyDivider1),

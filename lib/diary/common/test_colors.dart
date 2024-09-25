@@ -11,6 +11,7 @@ abstract class TestColors {
   static const Color greyDivider1 = Color(0xFFDBDBDB);
   static const Color greyDivider2 = Color(0xFFF4F4F4);
   static const Color disabled = Color(0xFFBDBDBD);
+  static const Color red1 = Color(0xFFEF2D24);
 
 
 // - 生气 9B101C

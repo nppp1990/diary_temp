@@ -1,4 +1,4 @@
-abstract class TestConfiguration {
+abstract final class TestConfiguration {
   static const double pagePadding = 20;
 
   static const double editorPadding = 16.0;
