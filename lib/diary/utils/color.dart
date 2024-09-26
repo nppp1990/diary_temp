@@ -1,7 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
-abstract class QuilColors {
+abstract class ColorUtils {
+  static String? colorToHex(Color? color) {
+    if (color == null) {
+      return null;
+    }
+    return color.value.toRadixString(16).padLeft(8, '0').toUpperCase();
+  }
+
+  static Color? hexToColor(String? hexString) {
+    if (hexString == null) {
+      return null;
+    }
+
+    final buffer = StringBuffer();
+    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
+    buffer.write(hexString);
+    return Color(int.tryParse(buffer.toString(), radix: 16) ?? 0xFF000000);
+  }
+
+  static bool isDarkColor(Color color) {
+    final luminance = color.computeLuminance();
+    return luminance < 0.5;
+  }
+
+
+
+
+
   static Color stringToColor(String? s, [Color? originalColor, DefaultStyles? defaultStyles]) {
     final palette = defaultStyles?.palette;
     if (s != null && palette != null) {

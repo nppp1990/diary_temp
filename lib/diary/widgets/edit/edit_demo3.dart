@@ -1,13 +1,16 @@
 import 'dart:convert';
 
-import 'package:dribbble/diary/bean/template_add_dialog.dart';
 import 'package:dribbble/diary/common/test_colors.dart';
 import 'package:dribbble/diary/common/test_configuration.dart';
+import 'package:dribbble/diary/data/bean/template.dart';
+import 'package:dribbble/diary/data/sqlite_helper.dart';
+import 'package:dribbble/diary/utils/dialog_utils.dart';
 import 'package:dribbble/diary/utils/keyboard.dart';
 import 'package:dribbble/diary/widgets/bg_page.dart';
 import 'package:dribbble/diary/widgets/edit/header/edit_header.dart';
 import 'package:dribbble/diary/widgets/edit/toolbar/background/background_selector.dart';
 import 'package:dribbble/diary/widgets/edit/toolbar/template/template_item.dart';
+import 'package:dribbble/diary/widgets/edit/toolbar/template/template_add_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -99,45 +102,83 @@ class TestEditState extends State<TestEdit> {
     _showEmotionDialogNotifier.value = show;
   }
 
+  void insertTemplate(String data) {
+    var doc = Document.fromJson(jsonDecode(data));
+    final int index = controller.selection.baseOffset;
+    controller.skipRequestKeyboard = true;
+    controller.replaceText(index, 0, doc.toDelta(), TextSelection.collapsed(offset: index + doc.length));
+  }
+
   void _formatTitle() {
     // todo
     controller.formatText(0, 1, Attribute.h2);
   }
 
-  String? _testJson = null;
-
-  void _saveDoc() {
-    // controller.getPlainText();
+  void _saveDocAsTemplate(BuildContext context) async{
+    if (controller.document.isEmpty()) {
+      DialogUtils.showToast(context, 'content is empty');
+      return;
+    }
 
     final delta = controller.document.toDelta();
-    final json = jsonEncode(delta.toJson());
+    final bgInfo = backgroundController.backgroundInfo.value;
+    final Color? bgColor;
+    final String? bgImage;
+    if (bgInfo == null) {
+      bgColor = Colors.white;
+      bgImage = null;
+    } else {
+      bgColor = bgInfo.backgroundColor;
+      bgImage = bgInfo.assetImage?.assetName;
+    }
 
+    var res = await TemplateAddDialog.show(
+      context,
+      title: getFirstText(controller),
+      content: _getPlainTextFromDelta(delta),
+      backgroundColor: bgColor,
+      backgroundImage: bgImage,
+    );
+
+    // Navigator.pop(context, {'title': title, 'desc': _desc});
+    if (res != null && res is Map) {
+      var id = await TestSqliteHelper.instance.createTemplate(
+        Template(
+          name: res['title'],
+          desc: res['desc'],
+          data:  jsonEncode(delta.toJson()),
+          backgroundColor: bgColor,
+          backgroundImage: bgImage,
+        ),
+      );
+      if (context.mounted) {
+        if (id > 0) {
+          DialogUtils.showToast(context, 'add template success');
+        } else {
+          DialogUtils.showToast(context, 'add template failed');
+        }
+      }
+    }
+  }
+
+  void _saveDoc() {
+    final data = jsonEncode(controller.document.toDelta().toJson());
+
+    // final allText = _getPlainTextFromDelta(delta);
+    print('----data:\n $data');
+
+    var test = jsonDecode(data);
+    print('-----test: $test');
+  }
+
+  String _getPlainTextFromDelta(Delta delta) {
     String allText = '';
-
     for (final op in delta.operations) {
       if (op.isInsert) {
         allText += op.value;
-        print('----insert: ${op.value}');
-      } else {
-        print('----retain: ${op.length}');
       }
     }
-
-    print('----allText: $allText');
-
-    final text = controller.getPlainText();
-    print('----text: $text');
-
-    print('----json: $json');
-
-    print('----first text: ${getFirstText(controller)}');
-    _testJson = json;
-    TemplateAddDialog.show(
-      context,
-      color: Colors.yellow,
-      content: allText,
-      title: getFirstText(controller),
-    );
+    return allText;
   }
 
   String _getPlainTextFromJson(String deltaJson) {
@@ -178,18 +219,26 @@ class TestEditState extends State<TestEdit> {
           controller: backgroundController,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
-            iconTheme: const IconThemeData(color: TestColors.black1, size: 28),
+            iconTheme: TestConfiguration.toolbarIconStyle,
             title: const Text('Edit'),
             actions: [
               PopupMenuButton(
                 icon: const Icon(Icons.more_vert),
+                color: Colors.white,
+                offset: const Offset(-20, 36),
+                menuPadding: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                  // side: const BorderSide(color: TestColors.primary, width: 1),
+                ),
                 itemBuilder: (context) {
                   return [
                     PopupMenuItem(
+                      textStyle: const TextStyle(color: TestColors.black1),
                       onTap: () {
-                        // Navigator.pop(context);
+                        _saveDocAsTemplate(context);
                       },
-                      child: const Text('item1'),
+                      child: const Text('save as template'),
                     ),
                     const PopupMenuItem(
                       child: Text('item2'),
@@ -215,11 +264,9 @@ class TestEditState extends State<TestEdit> {
                     onDateChanged: (date) {
                       // year, month, day hh:mm
                       print('----date: $date');
-                      _saveDoc();
                     },
                     onEmotionChanged: (index) {
                       print('----emotion: $index');
-                      _loadDoc(_testJson);
                     },
                   ),
                   Container(height: 1, color: TestColors.greyDivider1),

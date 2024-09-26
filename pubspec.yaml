@@ -50,6 +50,8 @@ dependencies:
   super_clipboard: ^0.8.22
   star_menu: ^4.0.1
   pageviewj: ^0.0.3
+  sqflite: ^2.3.3+1
+  path: ^1.9.0
 
 
 dev_dependencies:

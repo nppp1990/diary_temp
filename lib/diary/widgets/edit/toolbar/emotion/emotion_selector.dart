@@ -1,13 +1,6 @@
 import 'package:dribbble/diary/common/test_configuration.dart';
 import 'package:flutter/material.dart';
 
-const List<String> _emotionList = [
-  'assets/images/ic_emotion1.png',
-  'assets/images/ic_emotion2.png',
-  'assets/images/ic_emotion3.png',
-  'assets/images/ic_emotion4.png',
-];
-
 class EmotionSelector extends StatelessWidget {
   final Function(String) onEmotionSelected;
 

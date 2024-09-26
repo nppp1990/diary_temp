@@ -72,7 +72,7 @@ class _ColorBarItemState extends State<ColorBarItem> {
       return isBackground ? Colors.white : TestColors.black1;
     }
     String value = attrs.attributes[key]!.value;
-    return QuilColors.stringToColor(value);
+    return ColorUtils.stringToColor(value);
   }
 
   @override
@@ -129,7 +129,7 @@ class ColorSelectDialog extends StatelessWidget {
       return isBackground ? Colors.white : TestColors.black1;
     }
     String value = attrs.attributes[key]!.value;
-    return QuilColors.stringToColor(value);
+    return ColorUtils.stringToColor(value);
   }
 
   void _onColorSelected(Color? color, bool isBackground) {

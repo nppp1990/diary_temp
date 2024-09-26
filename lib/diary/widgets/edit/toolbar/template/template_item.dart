@@ -63,6 +63,7 @@ class ToolbarTemplateItemState extends State<ToolbarTemplateItem> {
               behavior: HitTestBehavior.translucent,
               onTap: () {
                 showBubbleDialog(false);
+                widget.onTap();
               },
               child: const TemplateTipBubble(triangleOffset: 15),
             ),

@@ -263,10 +263,7 @@ class _EmotionSelectorState extends State<_EmotionSelector> with SingleTickerPro
       duration: const Duration(milliseconds: 1000),
     );
     if (_index == null) {
-      // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      //   _showBubbleGuideDialog(context);
-      // });
-      Future.delayed(const Duration(milliseconds: 300), () {
+      Future.delayed(const Duration(milliseconds: 500), () {
         if (context.mounted) {
           _showBubbleGuideDialog(context);
         }

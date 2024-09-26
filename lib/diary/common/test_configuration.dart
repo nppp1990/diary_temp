@@ -1,3 +1,6 @@
+import 'package:dribbble/diary/common/test_colors.dart';
+import 'package:flutter/material.dart';
+
 abstract final class TestConfiguration {
   static const double pagePadding = 20;
 
@@ -20,6 +23,8 @@ abstract final class TestConfiguration {
   static const double t4 = 14;
   static const double t5 = 12;
   static const double t6 = 10;
+
+  static const toolbarIconStyle = IconThemeData(color: TestColors.black1, size: 28);
 
   // static const List<int> editToolBarMoodList = [
   //   4, // relaxed
