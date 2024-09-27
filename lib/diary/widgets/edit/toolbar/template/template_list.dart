@@ -8,15 +8,22 @@ import 'package:dribbble/diary/widgets/edit/toolbar/template/template_add_dialog
 import 'package:dribbble/diary/widgets/loading.dart';
 import 'package:flutter/material.dart';
 
-class TemplateListPage extends StatelessWidget {
+class TemplateListPage extends StatefulWidget {
+  const TemplateListPage({super.key});
+
+  @override
+  State<TemplateListPage> createState() => _TemplateListPageState();
+}
+
+class _TemplateListPageState extends State<TemplateListPage> {
   static final _testData = [
-    Template(
-        name: 'My day',
-        isBuiltIn: true,
-        data:
-            r'[{"insert":"My day"},{"insert":"\n","attributes":{"header":2}},{"insert":"☀️ What was the best thing about today and why? \n\n⚡️ What were the challenges today and how did I overcome them? \n\n💫 What interesting or unusual things happened today? \n\n💙 What was my emotional state during the day and what influenced it?  \n"}]',
-        desc: 'A simple template to record your day',
-        backgroundColor: const Color(0xFFF8F8F8)),
+    // Template(
+    //     name: 'My day',
+    //     isBuiltIn: true,
+    //     data:
+    //     r'[{"insert":"My day"},{"insert":"\n","attributes":{"header":2}},{"insert":"☀️ What was the best thing about today and why? \n\n⚡️ What were the challenges today and how did I overcome them? \n\n💫 What interesting or unusual things happened today? \n\n💙 What was my emotional state during the day and what influenced it?  \n"}]',
+    //     desc: 'A simple template to record your day',
+    //     backgroundColor: const Color(0xFFF8F8F8)),
     Template(
         name: 'Gratitude',
         isBuiltIn: true,
@@ -53,7 +60,18 @@ class TemplateListPage extends StatelessWidget {
     )
   ];
 
-  const TemplateListPage({super.key});
+  final List<Template> _items = [];
+
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
+
+  void _removeItem(int index, Template template) {
+    _items.removeAt(index);
+    _listKey.currentState!.removeItem(
+      index,
+      (context, animation) => _TemplateListItem(template: template, animation: animation),
+      duration: const Duration(milliseconds: 300),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,12 +104,19 @@ class TemplateListPage extends StatelessWidget {
           ];
         },
         contentBuilder: (context, templates) {
-          return ListView.builder(
+          _items.clear();
+          _items.addAll(templates);
+          return AnimatedList(
+            key: _listKey,
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.only(top: 8),
-            itemCount: templates.length,
-            itemBuilder: (context, index) {
-              return _TemplateListItem(templates[index]);
+            initialItemCount: templates.length,
+            itemBuilder: (context, index, animation) {
+              return _TemplateListItem(
+                template: templates[index],
+                animation: animation,
+                onDeleted: () => _removeItem(index, templates[index]),
+              );
             },
           );
         },
@@ -102,8 +127,10 @@ class TemplateListPage extends StatelessWidget {
 
 class _TemplateListItem extends StatelessWidget {
   final Template template;
+  final Animation<double> animation;
+  final Function()? onDeleted;
 
-  const _TemplateListItem(this.template);
+  const _TemplateListItem({required this.template, required this.animation, this.onDeleted});
 
   _showInfoDialog(BuildContext context, Template template) async {
     var res = await TemplateInfoDialog.show(
@@ -119,13 +146,14 @@ class _TemplateListItem extends StatelessWidget {
     }
   }
 
-  _onLongPress(BuildContext context) {
+  _onLongPress(BuildContext itemContext) {
     if (template.isBuiltIn) {
       return;
     }
     // show bottom sheet: view、update、delete
     showModalBottomSheet(
-      context: context,
+      useSafeArea: true,
+      context: itemContext,
       builder: (context) {
         return Container(
           color: Colors.white,
@@ -139,7 +167,7 @@ class _TemplateListItem extends StatelessWidget {
                   title: const Text('View'),
                   onTap: () async {
                     Navigator.pop(context);
-                    _showInfoDialog(context, template);
+                    _showInfoDialog(itemContext, template);
                   },
                 ),
               ),
@@ -167,7 +195,7 @@ class _TemplateListItem extends StatelessWidget {
                   title: const Text('Delete'),
                   onTap: () {
                     Navigator.pop(context);
-                    _deleteTemplate(context, template);
+                    _deleteTemplate(itemContext, template);
                   },
                 ),
               ),
@@ -183,8 +211,10 @@ class _TemplateListItem extends StatelessWidget {
         title: 'Delete template?', content: 'The template will be permanently removed', confirmText: 'Delete');
     if (res is int && res > 0) {
       var res = await TestSqliteHelper.instance.deleteTemplate(template.id!);
+      print('delete----????$res');
       if (res > 0 && context.mounted) {
         DialogUtils.showToast(context, 'Template deleted');
+        onDeleted?.call();
       }
     } else {
       print('cancel----$res');
@@ -193,85 +223,93 @@ class _TemplateListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: TestConfiguration.dialogPadding, vertical: 8),
-      child: OffsetCard(
-        cardHeight: TestConfiguration.templateItemHeight,
-        offset: const Offset(0, 6),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.black, width: 2),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: InkWell(
-          onTap: () {
-            _showInfoDialog(context, template);
-          },
-          onLongPress: template.isBuiltIn ? null : () => _onLongPress(context),
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            height: TestConfiguration.templateItemHeight,
+    print('---build item---desc: ${template.desc}, name: ${template.name}');
+    return SizeTransition(
+      sizeFactor: animation,
+      child: FadeTransition(
+        opacity: animation,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: TestConfiguration.dialogPadding, vertical: 8),
+          child: OffsetCard(
+            cardHeight: TestConfiguration.templateItemHeight,
+            offset: const Offset(0, 6),
             decoration: BoxDecoration(
-              color: template.backgroundColor,
-              image: template.backgroundImage == null
-                  ? null
-                  : DecorationImage(
-                      image: AssetImage(template.backgroundImage!),
-                      fit: BoxFit.cover,
-                    ),
+              color: Colors.white,
               border: Border.all(color: Colors.black, width: 2),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          template.name,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
+            child: InkWell(
+              onTap: () {
+                _showInfoDialog(context, template);
+              },
+              onLongPress: template.isBuiltIn ? null : () => _onLongPress(context),
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                height: TestConfiguration.templateItemHeight,
+                decoration: BoxDecoration(
+                  color: template.backgroundColor,
+                  image: template.backgroundImage == null
+                      ? null
+                      : DecorationImage(
+                          image: AssetImage(template.backgroundImage!),
+                          fit: BoxFit.cover,
+                        ),
+                  border: Border.all(color: Colors.black, width: 2),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              template.name,
+                              maxLines: 1,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              template.desc ?? '暂无描述',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      OutlinedButton(
+                        onPressed: () {
+                          Navigator.pop(context, template);
+                        },
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          backgroundColor: Colors.white,
+                          foregroundColor: TestColors.black1,
+                          side: const BorderSide(color: TestColors.black1, width: 2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+                        ),
+                        child: const Text(
+                          'Use',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          template.desc ?? 'todo',
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  OutlinedButton(
-                    onPressed: () {
-                      Navigator.pop(context, template);
-                    },
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      backgroundColor: Colors.white,
-                      foregroundColor: TestColors.black1,
-                      side: const BorderSide(color: TestColors.black1, width: 2),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
-                    ),
-                    child: const Text(
-                      'Use',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),

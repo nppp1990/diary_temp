@@ -13,6 +13,7 @@ class EditMoodPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Mood'),
+        iconTheme: TestConfiguration.toolbarIconStyle,
         actions: [
           IconButton(
             icon: const Icon(Icons.check),
