@@ -241,76 +241,79 @@ class _TemplateListItem extends StatelessWidget {
               border: Border.all(color: Colors.black, width: 2),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: InkWell(
-              onTap: () {
-                _showInfoDialog(context, template);
-              },
-              onLongPress: template.isBuiltIn ? null : () => _onLongPress(context),
+            child: Material(
+              color: template.backgroundColor,
               borderRadius: BorderRadius.circular(16),
-              child: Container(
-                height: TestConfiguration.templateItemHeight,
-                decoration: BoxDecoration(
-                  color: template.backgroundColor,
-                  image: template.backgroundImage == null
-                      ? null
-                      : DecorationImage(
-                          image: AssetImage(template.backgroundImage!),
-                          fit: BoxFit.cover,
-                        ),
-                  border: Border.all(color: Colors.black, width: 2),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              template.name,
-                              maxLines: 1,
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w600,
+              child: InkWell(
+                onTap: () {
+                  _showInfoDialog(context, template);
+                },
+                onLongPress: template.isBuiltIn ? null : () => _onLongPress(context),
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  height: TestConfiguration.templateItemHeight,
+                  decoration: BoxDecoration(
+                    image: template.backgroundImage == null
+                        ? null
+                        : DecorationImage(
+                            image: AssetImage(template.backgroundImage!),
+                            fit: BoxFit.cover,
+                          ),
+                    border: Border.all(color: Colors.black, width: 2),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                template.name,
+                                maxLines: 1,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              template.desc ?? '暂无描述',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      OutlinedButton(
-                        onPressed: () {
-                          Navigator.pop(context, template);
-                        },
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          backgroundColor: Colors.white,
-                          foregroundColor: TestColors.black1,
-                          side: const BorderSide(color: TestColors.black1, width: 2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
-                        ),
-                        child: const Text(
-                          'Use',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
+                              const SizedBox(height: 6),
+                              Text(
+                                template.desc ?? '暂无描述',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        OutlinedButton(
+                          onPressed: () {
+                            Navigator.pop(context, template);
+                          },
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            backgroundColor: Colors.white,
+                            foregroundColor: TestColors.black1,
+                            side: const BorderSide(color: TestColors.black1, width: 2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+                          ),
+                          child: const Text(
+                            'Use',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

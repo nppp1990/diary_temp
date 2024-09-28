@@ -9,6 +9,7 @@ import 'package:dribbble/diary/widgets/emotion/edit_mood.dart';
 import 'package:dribbble/diary/widgets/emotion/emotion_list.dart';
 import 'package:dribbble/diary/widgets/menu/home.dart';
 import 'package:dribbble/diary/widgets/page_turn.dart';
+import 'package:dribbble/diary/widgets/test_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -138,6 +139,12 @@ class _MyHomePageState extends State<MyHomePage> {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const TemplateListPage()),
+      );
+    }),
+    ListItem('test list', (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const TestListPage()),
       );
     }),
   ];

@@ -53,15 +53,19 @@ class DashOffsetCard extends StatelessWidget {
   final double dashWidth;
   final double dashSpace;
   final double borderRadius;
+  final double? cardWidth;
+  final Color? backgroundColor;
 
   const DashOffsetCard({
     super.key,
+    this.cardWidth,
     required this.offset,
     this.color = Colors.black,
     this.strokeWidth = 2.0,
     this.dashWidth = 5.0,
     this.dashSpace = 3.0,
     this.borderRadius = 12.0,
+    this.backgroundColor,
     required this.child,
   });
 
@@ -78,7 +82,20 @@ class DashOffsetCard extends StatelessWidget {
               strokeWidth: strokeWidth,
               dashWidth: dashWidth,
               dashSpace: dashSpace,
-              child: const SizedBox.expand(),
+              backgroundColor: backgroundColor,
+              child: cardWidth == null
+                  ? Container(
+                      decoration: BoxDecoration(
+                      // color: backgroundColor,
+                      borderRadius: BorderRadius.circular(borderRadius),
+                    ))
+                  : Container(
+                      width: cardWidth,
+                      height: double.infinity,
+                      decoration: BoxDecoration(
+                        // color: backgroundColor,
+                        borderRadius: BorderRadius.circular(borderRadius),
+                      )),
             ),
           ),
           child,
@@ -93,7 +110,6 @@ class RotateCard extends StatelessWidget {
   final BoxDecoration decoration;
   final double angle;
   final Widget child;
-
 
   const RotateCard({
     super.key,

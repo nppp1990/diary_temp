@@ -9,6 +9,7 @@ class DashedBorder extends StatelessWidget {
   final double dashWidth;
   final double dashSpace;
   final double borderRadius;
+  final Color? backgroundColor;
 
   const DashedBorder({
     super.key,
@@ -18,6 +19,7 @@ class DashedBorder extends StatelessWidget {
     this.dashWidth = 5.0,
     this.dashSpace = 3.0,
     this.borderRadius = 12.0,
+    this.backgroundColor,
   });
 
   @override
@@ -29,6 +31,7 @@ class DashedBorder extends StatelessWidget {
         dashWidth: dashWidth,
         dashSpace: dashSpace,
         borderRadius: borderRadius,
+        backgroundColor: backgroundColor,
       ),
       child: child,
     );
@@ -41,6 +44,7 @@ class DashedRoundedBorderPainter extends CustomPainter {
   final double dashWidth;
   final double dashSpace;
   final double borderRadius;
+  final Color? backgroundColor;
 
   DashedRoundedBorderPainter({
     required this.color,
@@ -48,6 +52,7 @@ class DashedRoundedBorderPainter extends CustomPainter {
     this.dashWidth = 5.0,
     this.dashSpace = 3.0,
     this.borderRadius = 12.0,
+    this.backgroundColor,
   });
 
   @override
@@ -76,7 +81,17 @@ class DashedRoundedBorderPainter extends CustomPainter {
       }
     }
 
+    if (backgroundColor != null) {
+      final Paint bgPaint = Paint()..color = backgroundColor!;
+      Path rectPath = Path()
+        ..addRRect(RRect.fromRectAndRadius(
+          Rect.fromLTWH(0, 0, size.width, size.height),
+          Radius.circular(borderRadius),
+        ));
+      canvas.drawPath(rectPath, bgPaint);
+    }
     canvas.drawPath(dashPath, paint);
+
   }
 
   @override
