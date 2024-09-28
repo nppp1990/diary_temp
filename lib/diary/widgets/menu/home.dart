@@ -1,6 +1,7 @@
 import 'package:dribbble/diary/common/test_colors.dart';
 import 'package:dribbble/diary/widgets/edit/edit_demo3.dart';
 import 'package:dribbble/diary/widgets/emotion/edit_mood.dart';
+import 'package:dribbble/diary/widgets/simple/event_dialog.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatelessWidget {
@@ -95,8 +96,12 @@ class _ItemsActionButtonState extends State<_ItemsActionButton> with SingleTicke
   }
 
   void _removeOverlay() {
-    _controller.reverse();
-    _overlayEntry?.remove();
+    if (context.mounted) {
+      _overlayEntry?.remove();
+      _overlayEntry?.dispose();
+      _overlayEntry = null;
+      _controller.reverse();
+    }
   }
 
   @override
@@ -116,6 +121,7 @@ class _ItemsActionButtonState extends State<_ItemsActionButton> with SingleTicke
 
   @override
   void dispose() {
+    _overlayEntry?.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -142,17 +148,14 @@ class _ItemsActionButtonState extends State<_ItemsActionButton> with SingleTicke
         child: Opacity(
           opacity: _animation.value,
           child: _buildFloatingActionItem(_textList[index], _iconList[index], () {
-            print('------_removeOverlay:index: $index');
             _removeOverlay();
-            print('---context: $context, index: $index');
             if (index == 0) {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) => const TestEditDemo3()));
             } else if (index == 1) {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) => const EditMoodPage()));
             } else if (index == 2) {
-              // Navigator.of(context).push(MaterialPageRoute(builder: (context) => const TestEditDemo3()));
+              SimpleEventDialog.showEventDialog(context);
             }
-            print('FloatingActionButton item $index tapped');
           }),
         ),
       ),

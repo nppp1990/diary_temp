@@ -79,6 +79,7 @@ class _TemplateListPageState extends State<TemplateListPage> {
       appBar: AppBar(
         title: const Text('Template List'),
         iconTheme: TestConfiguration.toolbarIconStyle,
+        forceMaterialTransparency: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -157,6 +158,7 @@ class _TemplateListItem extends StatelessWidget {
       builder: (context) {
         return Container(
           color: Colors.white,
+          padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -199,6 +201,7 @@ class _TemplateListItem extends StatelessWidget {
                   },
                 ),
               ),
+              const Divider(color: TestColors.greyDivider1, height: 1),
             ],
           ),
         );
