@@ -54,11 +54,13 @@ class DashOffsetCard extends StatelessWidget {
   final double dashSpace;
   final double borderRadius;
   final double? cardWidth;
+  final double? cardHeight;
   final Color? backgroundColor;
 
   const DashOffsetCard({
     super.key,
     this.cardWidth,
+    this.cardHeight,
     required this.offset,
     this.color = Colors.black,
     this.strokeWidth = 2.0,
@@ -71,37 +73,35 @@ class DashOffsetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Stack(
-        children: [
-          Transform.translate(
-            offset: offset,
-            child: DashedBorder(
-              borderRadius: borderRadius,
-              color: color,
-              strokeWidth: strokeWidth,
-              dashWidth: dashWidth,
-              dashSpace: dashSpace,
-              backgroundColor: backgroundColor,
-              child: cardWidth == null
-                  ? Container(
-                      decoration: BoxDecoration(
-                      // color: backgroundColor,
-                      borderRadius: BorderRadius.circular(borderRadius),
-                    ))
-                  : Container(
-                      width: cardWidth,
-                      height: double.infinity,
-                      decoration: BoxDecoration(
-                        // color: backgroundColor,
-                        borderRadius: BorderRadius.circular(borderRadius),
-                      )),
-            ),
+    Widget content = Stack(
+      children: [
+        Transform.translate(
+          offset: offset,
+          child: DashedBorder(
+            borderRadius: borderRadius,
+            color: color,
+            strokeWidth: strokeWidth,
+            dashWidth: dashWidth,
+            dashSpace: dashSpace,
+            backgroundColor: backgroundColor,
+            child: Container(
+                width: cardWidth,
+                height: cardHeight,
+                // height: double.infinity,
+                decoration: BoxDecoration(
+                  // color: backgroundColor,
+                  borderRadius: BorderRadius.circular(borderRadius),
+                )),
           ),
-          child,
-        ],
-      ),
+        ),
+        child,
+      ],
     );
+    if (cardHeight != null) {
+      return content;
+    } else {
+      return IntrinsicHeight(child: content);
+    }
   }
 }
 

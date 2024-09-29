@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:dribbble/diary/utils/pathUtils.dart';
+import 'package:dribbble/diary/utils/path_utils.dart';
 import 'package:dribbble/diary/widgets/turn/const.dart';
 import 'package:dribbble/diary/widgets/turn/turn_direction.dart';
 import 'package:flutter/material.dart';

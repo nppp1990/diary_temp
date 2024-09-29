@@ -20,11 +20,11 @@ abstract class DocUtils {
     if (computeLineMetrics.isEmpty) {
       return 0;
     }
-    print('-----computeLineMetrics: $computeLineMetrics');
-    print('-----length: ${computeLineMetrics.length}');
-    for (var line in computeLineMetrics) {
-      print('-----line: $line');
-    }
+    // print('-----computeLineMetrics: $computeLineMetrics');
+    // print('-----length: ${computeLineMetrics.length}');
+    // for (var line in computeLineMetrics) {
+      // print('-----line: $line');
+    // }
     // get height
     return computeLineMetrics.fold(0, (previousValue, element) => previousValue + element.height);
   }

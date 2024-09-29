@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:dribbble/diary/utils/pathUtils.dart';
+import 'package:dribbble/diary/utils/path_utils.dart';
 import 'package:flutter/material.dart';
 
 class HappyEmotion extends StatelessWidget {

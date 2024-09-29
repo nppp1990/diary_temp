@@ -1,5 +1,6 @@
 import 'package:dribbble/diary/common/test_colors.dart';
 import 'package:dribbble/diary/common/test_configuration.dart';
+import 'package:dribbble/diary/utils/time_utils.dart';
 import 'package:dribbble/diary/widgets/card.dart';
 import 'package:flutter/material.dart';
 
@@ -178,17 +179,10 @@ class _TimeLayoutState extends State<_TimeLayout> {
                 size: 14,
               ),
               const SizedBox(width: 4),
-              Text(_getTimeStr(_time), style: const TextStyle(color: TestColors.black1, fontSize: 12)),
+              Text(TimeUtils.getTimeStr(_time), style: const TextStyle(color: TestColors.black1, fontSize: 12)),
             ],
           )),
     );
   }
 
-  // 12:30 am
-  String _getTimeStr(TimeOfDay time) {
-    final hour = time.hourOfPeriod;
-    final minute = time.minute;
-    final period = time.period;
-    return '${hour == 0 ? 12 : hour}:${minute.toString().padLeft(2, '0')} ${period == DayPeriod.am ? 'am' : 'pm'}';
-  }
 }

@@ -82,13 +82,30 @@ class _Page extends StatelessWidget {
         ),
         border: Border.all(color: Colors.black, width: 2),
       ),
-      child: Center(
-        child: Text(
-          'Page $index',
-          style: const TextStyle(
-            fontSize: 24,
-            color: Colors.black,
-            fontWeight: FontWeight.w700,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Page $index',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Container(
+                width: double.infinity,
+                height: 350,
+                color: Colors.yellow,
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec purus feugiat, vestibulum ligula sit amet, ultrices nunc. Nullam nec nunc nec nunc ultricies ultricies. Nullam nec nunc nec nunc ultricies ultricies.',
+                style: TextStyle(fontSize: 16),
+              ),
+            ],
           ),
         ),
       ),
