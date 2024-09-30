@@ -8,6 +8,20 @@ abstract class TimeUtils {
     final period = time.period;
     return '${hour == 0 ? 12 : hour}:${minute.toString().padLeft(2, '0')} ${period == DayPeriod.am ? 'am' : 'pm'}';
   }
+
+  static int? getDbTime(DateTime? dateTime) {
+    if (dateTime == null) {
+      return null;
+    }
+    return dateTime.millisecondsSinceEpoch ~/ 1000;
+  }
+
+  static DateTime? parseDbTime(int? time) {
+    if (time == null) {
+      return null;
+    }
+    return DateTime.fromMillisecondsSinceEpoch(time * 1000);
+  }
 }
 
 extension DateTimeExtension on DateTime {

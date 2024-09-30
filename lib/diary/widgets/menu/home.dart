@@ -121,7 +121,9 @@ class _ItemsActionButtonState extends State<_ItemsActionButton> with SingleTicke
 
   @override
   void dispose() {
+    _overlayEntry?.remove();
     _overlayEntry?.dispose();
+    _overlayEntry = null;
     _controller.dispose();
     super.dispose();
   }

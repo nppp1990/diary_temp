@@ -1,19 +1,25 @@
 import 'package:dribbble/diary/common/test_colors.dart';
 import 'package:dribbble/diary/common/test_configuration.dart';
+import 'package:dribbble/diary/data/bean/record.dart';
+import 'package:dribbble/diary/data/sqlite_helper.dart';
 import 'package:dribbble/diary/utils/time_utils.dart';
 import 'package:dribbble/diary/widgets/card.dart';
 import 'package:flutter/material.dart';
 
 class SimpleEventDialog extends StatefulWidget {
-  final TimeOfDay? timeOfDay;
-  final String? text;
+  final DiaryRecord? record;
 
-  const SimpleEventDialog({super.key, this.timeOfDay, this.text});
+  const SimpleEventDialog({
+    super.key,
+    this.record,
+  });
 
-  static showEventDialog(BuildContext context) {
+  static showEventDialog(BuildContext context, {DiaryRecord? record}) {
     return showDialog(
       context: context,
-      builder: (context) => const SimpleEventDialog(),
+      builder: (context) => SimpleEventDialog(
+        record: record,
+      ),
     );
   }
 
@@ -28,12 +34,32 @@ class _SimpleEventDialogState extends State<SimpleEventDialog> {
   @override
   void initState() {
     super.initState();
-    _time = widget.timeOfDay ?? TimeOfDay.now();
-    _textNotifier = ValueNotifier(widget.text);
+    _time = widget.record?.time.toTimeOfDay() ?? TimeOfDay.now();
+    _textNotifier = ValueNotifier(widget.record?.content);
   }
 
   void _save() {
-    print('save time: $_time, text: ${_textNotifier.value}');
+    // print('save time: $_time, text: ${_textNotifier.value}');
+    DateTime time;
+    if (widget.record == null) {
+      // _time+DateTime.now()
+      time = DateTime.now();
+    } else {
+      time = widget.record!.time;
+    }
+    time = DateTime(time.year, time.month, time.day, _time.hour, _time.minute);
+
+    var record = DiaryRecord(
+      id: widget.record?.id,
+      type: RecordType.event,
+      content: _textNotifier.value,
+      time: time,
+    );
+    if (record.id == null) {
+      RecordManager().insertRecord(record);
+    } else {
+      RecordManager().updateRecord(record);
+    }
     Navigator.of(context).pop();
   }
 
@@ -77,7 +103,8 @@ class _SimpleEventDialogState extends State<SimpleEventDialog> {
                     const SizedBox(height: 16),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: TestConfiguration.pagePadding),
-                      child: TextField(
+                      child: TextFormField(
+                        initialValue: widget.record?.content,
                         maxLength: 20,
                         maxLines: null,
                         decoration: const InputDecoration(
@@ -184,5 +211,4 @@ class _TimeLayoutState extends State<_TimeLayout> {
           )),
     );
   }
-
 }

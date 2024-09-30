@@ -38,14 +38,14 @@ abstract final class TestConfiguration {
   // ];
 
   static const List<String> moodImagesForToolbar = [
-    'assets/images/emotion_relaxed.svg',
-    'assets/images/emotion_happy.svg',
-    'assets/images/emotion_excited.svg',
-    'assets/images/emotion_laugh.svg',
-    'assets/images/emotion_sad.svg',
-    'assets/images/emotion_worried.svg',
-    'assets/images/emotion_frustrated.svg',
-    'assets/images/emotion_angry.svg',
+    'assets/images/emotion_relaxed.svg', // 4
+    'assets/images/emotion_happy.svg', // 5
+    'assets/images/emotion_excited.svg', // 6
+    'assets/images/emotion_laugh.svg', // 7
+    'assets/images/emotion_sad.svg', // 3
+    'assets/images/emotion_worried.svg', // 2
+    'assets/images/emotion_frustrated.svg', // 1
+    'assets/images/emotion_angry.svg', // 0
   ];
 
   static const List<String> moodTextsForToolbar = [

@@ -59,14 +59,14 @@ class EditHeader1 extends StatelessWidget {
 
 class EditHeader2 extends StatefulWidget {
   final DateTime date;
-  final int? emotionIndex;
+  final int? moodIndex;
   final ValueChanged<DateTime>? onDateChanged;
   final ValueChanged<int>? onEmotionChanged;
 
   const EditHeader2({
     super.key,
     required this.date,
-    this.emotionIndex,
+    this.moodIndex,
     this.onDateChanged,
     this.onEmotionChanged,
   });
@@ -120,7 +120,7 @@ class _EditHeader2State extends State<EditHeader2> {
             const SizedBox(width: 16),
             const Spacer(),
             _EmotionSelector(
-              emotionIndex: widget.emotionIndex,
+              moodIndex: widget.moodIndex,
               onChanged: widget.onEmotionChanged,
             ),
           ],
@@ -241,10 +241,10 @@ class _TimeSelectorState extends State<_TimeSelector> {
 }
 
 class _EmotionSelector extends StatefulWidget {
-  final int? emotionIndex;
+  final int? moodIndex;
   final ValueChanged<int>? onChanged;
 
-  const _EmotionSelector({this.emotionIndex, this.onChanged});
+  const _EmotionSelector({this.moodIndex, this.onChanged});
 
   @override
   State<StatefulWidget> createState() => _EmotionSelectorState();
@@ -257,7 +257,7 @@ class _EmotionSelectorState extends State<_EmotionSelector> with SingleTickerPro
   @override
   void initState() {
     super.initState();
-    _index = widget.emotionIndex;
+    _index = _convertToToolbarIndex(widget.moodIndex);
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
@@ -268,6 +268,25 @@ class _EmotionSelectorState extends State<_EmotionSelector> with SingleTickerPro
           _showBubbleGuideDialog(context);
         }
       });
+    }
+  }
+
+  int? _convertToToolbarIndex(int? index) {
+    if (index == null) {
+      return null;
+    }
+    if (index < 4) {
+      return 7 - index;
+    } else {
+      return index - 4;
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _EmotionSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.moodIndex != oldWidget.moodIndex) {
+      _index = _convertToToolbarIndex(widget.moodIndex);
     }
   }
 
@@ -291,9 +310,10 @@ class _EmotionSelectorState extends State<_EmotionSelector> with SingleTickerPro
         haloColor: TestColors.primary.withOpacity(0.2),
         haloSize: 10,
         child: SvgPicture.asset(
-          emotions[_index ?? 0],
+          _index == null ? 'assets/icons/ic_mood_add.svg' : emotions[_index!],
           width: TestConfiguration.editHeaderItemSize,
           height: TestConfiguration.editHeaderItemSize,
+          colorFilter: _index == null ? const ColorFilter.mode(TestColors.black1, BlendMode.srcIn) : null,
         ),
       ),
     );
@@ -321,7 +341,9 @@ class _EmotionSelectorState extends State<_EmotionSelector> with SingleTickerPro
     if (res != null && res is int) {
       setState(() {
         _index = res;
-        widget.onChanged?.call(res);
+        widget.onChanged?.call(
+          res < 4 ? res + 4 : 7 - res,
+        );
       });
     }
   }

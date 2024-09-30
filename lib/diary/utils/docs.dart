@@ -1,5 +1,7 @@
+import 'dart:collection';
 import 'dart:convert';
 
+import 'package:dribbble/diary/data/bean/record.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/quill_delta.dart';
 
@@ -43,7 +45,7 @@ abstract class DocUtils {
     return textPainter.computeLineMetrics();
   }
 
-  String getPlainTextFromJson(String deltaJson) {
+  static String getPlainTextFromJson(String deltaJson) {
     final delta = Delta.fromJson(jsonDecode(deltaJson));
     String allText = '';
     for (final op in delta.operations) {
@@ -54,7 +56,7 @@ abstract class DocUtils {
     return allText;
   }
 
-  String getPlainTextFromDelta(Delta delta) {
+  static String getPlainTextFromDelta(Delta delta) {
     String allText = '';
     for (final op in delta.operations) {
       if (op.isInsert) {
@@ -63,4 +65,48 @@ abstract class DocUtils {
     }
     return allText;
   }
+
+  static Map<DateTime, List<DiaryRecord>>? groupRecordsByDate(List<DiaryRecord>? records) {
+    if (records == null) {
+      return {};
+    }
+    Map<DateTime, List<DiaryRecord>> map = {};
+    for (var record in records) {
+      DateTime date = DateTime(record.time.year, record.time.month, record.time.day);
+      if (record.type == RecordType.diary && record.diaryPlainText == null) {
+        record.diaryPlainText = getPlainTextFromJson(record.content!);
+      }
+      if (map.containsKey(date)) {
+        map[date]!.add(record);
+      } else {
+        map[date] = [record];
+      }
+    }
+    // List<DiaryRecord> 按照time从大到小排序
+    map.forEach((key, value) {
+      value.sort((a, b) => b.time.compareTo(a.time));
+    });
+    // map 按照time从大到小排序
+    return SplayTreeMap<DateTime, List<DiaryRecord>>.from(map, (a, b) => b.compareTo(a));
+  }
+
+  static int? getDayMood(List<DiaryRecord> records) {
+    int totalMood = 0;
+    int count = 0;
+    for (var record in records) {
+      if (record.moodForAllDay == true) {
+        return record.mood!;
+      }
+      if (record.mood != null) {
+        totalMood += record.mood!;
+        count++;
+      }
+    }
+    if (count == 0) {
+      return null;
+    }
+    return totalMood ~/ count;
+  }
+
+
 }

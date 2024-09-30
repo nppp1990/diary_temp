@@ -1,35 +1,138 @@
 import 'package:dribbble/diary/common/test_colors.dart';
 import 'package:dribbble/diary/common/test_configuration.dart';
+import 'package:dribbble/diary/data/bean/record.dart';
+import 'package:dribbble/diary/data/sqlite_helper.dart';
+import 'package:dribbble/diary/utils/dialog_utils.dart';
 import 'package:dribbble/diary/widgets/bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pageviewj/pageviewj.dart';
 
-class EditMoodPage extends StatelessWidget {
-  const EditMoodPage({super.key});
+class EditMoodPage extends StatefulWidget {
+  // final int? moodIndex;
+  // final String? note;
+  // final bool? isOneDayMood;
+  final DiaryRecord? record;
+
+  const EditMoodPage({super.key, this.record});
+
+  @override
+  State<StatefulWidget> createState() => _EditMoodPageState();
+}
+
+class _EditMoodPageState extends State<EditMoodPage> {
+  late int? _moodIndex;
+  late String? _note;
+  late bool _isOneDayMood;
+
+  @override
+  void initState() {
+    super.initState();
+    _moodIndex = widget.record?.mood;
+    _note = widget.record?.content;
+    _isOneDayMood = widget.record?.moodForAllDay ?? false;
+  }
+
+  bool _hasChanged() {
+    bool oldIsOneDayMood = widget.record?.moodForAllDay ?? false;
+    return _moodIndex != widget.record?.mood || _note != widget.record?.content || _isOneDayMood != oldIsOneDayMood;
+  }
+
+  void _saveMood() async {
+    if (_moodIndex == null || !_hasChanged()) {
+      return;
+    }
+    var record = DiaryRecord(
+      id: widget.record?.id,
+      type: RecordType.mood,
+      mood: _moodIndex!,
+      content: _note,
+      moodForAllDay: _isOneDayMood,
+      time: widget.record?.time ?? DateTime.now(),
+    );
+    if (record.id == null) {
+      RecordManager().insertRecord(record);
+    } else {
+      RecordManager().updateRecord(record);
+    }
+  }
+
+  void _handlePop(BuildContext context) async {
+    if (_moodIndex == null || !_hasChanged()) {
+      Navigator.pop(context);
+      return;
+    }
+    var res = await DialogUtils.showConfirmDialog(
+      context,
+      title: 'Save Mood?',
+      content: 'You have unsaved changes. Do you want to save them?',
+      cancelText: 'Discard',
+      confirmText: 'Save',
+    );
+    if (context.mounted) {
+      if (res is int && res > 0) {
+        _saveMood();
+        Navigator.of(context).pop();
+      } else {
+        Navigator.of(context).pop();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Mood'),
-        iconTheme: TestConfiguration.toolbarIconStyle,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-        ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          return;
+        }
+        _handlePop(context);
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Edit Mood'),
+          iconTheme: TestConfiguration.toolbarIconStyle,
+          forceMaterialTransparency: true,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.check),
+              onPressed: () {
+                _saveMood();
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+        body: EditMoodPageContent(
+          onChanged: (isOneDayMood, moodIndex, note) {
+            print('onChanged: $isOneDayMood, $moodIndex, $note');
+            _isOneDayMood = isOneDayMood;
+            _moodIndex = moodIndex;
+            _note = note;
+          },
+          isOneDayMood: _isOneDayMood,
+          note: _note,
+          moodIndex: _moodIndex,
+        ),
       ),
-      body: const EditMoodPageContent(),
     );
   }
 }
 
 class EditMoodPageContent extends StatefulWidget {
-  const EditMoodPageContent({super.key});
+  final int? moodIndex;
+  final String? note;
+  final bool isOneDayMood;
+  final Function(bool, int?, String?) onChanged;
+
+  const EditMoodPageContent({
+    super.key,
+    this.moodIndex,
+    this.note,
+    required this.isOneDayMood,
+    required this.onChanged,
+  });
 
   @override
   State<StatefulWidget> createState() => _EditMoodPageContentState();
@@ -37,11 +140,15 @@ class EditMoodPageContent extends StatefulWidget {
 
 class _EditMoodPageContentState extends State<EditMoodPageContent> {
   late ValueNotifier<bool> _isOneDayMood;
+  late int? _moodIndex;
+  late String? _note;
 
   @override
   void initState() {
     super.initState();
-    _isOneDayMood = ValueNotifier<bool>(false);
+    _isOneDayMood = ValueNotifier<bool>(widget.isOneDayMood);
+    _moodIndex = widget.moodIndex;
+    _note = widget.note;
   }
 
   @override
@@ -67,7 +174,13 @@ class _EditMoodPageContentState extends State<EditMoodPageContent> {
             },
           ),
           const SizedBox(height: 20),
-          const MoodPageView(),
+          MoodPageView(
+            moodIndex: _moodIndex,
+            onChanged: (index) {
+              _moodIndex = index;
+              widget.onChanged(_isOneDayMood.value, index, _note);
+            },
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: TestConfiguration.pagePadding),
             child: Row(
@@ -85,6 +198,7 @@ class _EditMoodPageContentState extends State<EditMoodPageContent> {
                       value: value,
                       onChanged: (value) {
                         _isOneDayMood.value = value;
+                        widget.onChanged(value, _moodIndex, _note);
                       },
                     );
                   },
@@ -96,6 +210,9 @@ class _EditMoodPageContentState extends State<EditMoodPageContent> {
           Padding(
               padding: const EdgeInsets.symmetric(horizontal: TestConfiguration.pagePadding),
               child: TextField(
+                onChanged: (value) {
+                  widget.onChanged(_isOneDayMood.value, _moodIndex, value);
+                },
                 decoration: InputDecoration(
                   hintText: 'Add a note',
                   hintStyle: const TextStyle(color: TestColors.grey1),
@@ -117,7 +234,10 @@ class _EditMoodPageContentState extends State<EditMoodPageContent> {
 }
 
 class MoodPageView extends StatefulWidget {
-  const MoodPageView({super.key});
+  final int? moodIndex;
+  final ValueChanged<int>? onChanged;
+
+  const MoodPageView({super.key, this.moodIndex, this.onChanged});
 
   @override
   State<StatefulWidget> createState() => _MoodPageViewState();
@@ -136,9 +256,11 @@ class _MoodPageViewState extends State<MoodPageView> {
       viewportFraction: 0.5,
     );
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      int moodIndex = widget.moodIndex ?? 4;
       Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) {
-          _controller.animateToPage(2, duration: const Duration(milliseconds: 300 * 2), curve: Curves.easeInOut);
+          _controller.animateToPage(moodIndex,
+              duration: const Duration(milliseconds: 300 * 2), curve: Curves.easeInOut);
         }
       });
     });
@@ -179,10 +301,6 @@ class _MoodPageViewState extends State<MoodPageView> {
         ),
         const SizedBox(height: 6),
         if (page == index.toDouble()) buildBubbleTip(context, TestConfiguration.moodTexts[index]),
-        // Expanded(
-        //     child: Center(
-        //   child: Text('index: $index, page: $page, aniValue: $aniValue'),
-        // )),
       ],
     );
   }
@@ -193,6 +311,9 @@ class _MoodPageViewState extends State<MoodPageView> {
     return SizedBox(
       height: screenWidth * _controller.viewportFraction + 80,
       child: PageViewJ.aniBuilder(
+        onPageChanged: (index) {
+          widget.onChanged?.call(index);
+        },
         controller: _controller,
         itemCount: moods.length,
         aniItemBuilder: (context, index, page, aniValue) {
