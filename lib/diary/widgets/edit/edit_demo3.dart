@@ -196,11 +196,11 @@ class TestEditState extends State<TestEdit> {
       backgroundImage: bgImage,
       time: _time,
     );
-    if (record.id == null) {
-      RecordManager().insertRecord(record);
-    } else {
-      RecordManager().updateRecord(record);
-    }
+    // if (record.id == null) {
+    //   RecordManager().insertRecord(record);
+    // } else {
+    //   RecordManager().updateRecord(record);
+    // }
   }
 
   void _loadDoc(String? json) {

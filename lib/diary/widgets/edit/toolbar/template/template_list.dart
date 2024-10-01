@@ -153,7 +153,7 @@ class _TemplateListItem extends StatelessWidget {
     }
     // show bottom sheet: view、update、delete
     showModalBottomSheet(
-      useSafeArea: true,
+      useSafeArea: false,
       context: itemContext,
       builder: (context) {
         return Container(

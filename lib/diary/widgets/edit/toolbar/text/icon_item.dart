@@ -9,10 +9,12 @@ class IconItem extends StatelessWidget {
   final String? tip;
   final bool selected;
   final VoidCallback onPressed;
+  final double iconScale;
 
   const IconItem({
     super.key,
     required this.icon,
+    this.iconScale = 0.7,
     this.tip,
     required this.selected,
     required this.onPressed,
@@ -40,8 +42,8 @@ class IconItem extends StatelessWidget {
             child: SvgPicture.asset(
               icon,
               colorFilter: ColorFilter.mode(selected ? TestColors.primary : TestColors.black1, BlendMode.srcIn),
-              width: TestConfiguration.boxItemSize1 * 0.7,
-              height: TestConfiguration.boxItemSize1 * 0.7,
+              width: TestConfiguration.boxItemSize1 * iconScale,
+              height: TestConfiguration.boxItemSize1 * iconScale,
             ),
           ),
         ),

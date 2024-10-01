@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:dribbble/diary/common/test_colors.dart';
 import 'package:dribbble/diary/common/test_configuration.dart';
 import 'package:dribbble/diary/data/bean/template.dart';
-import 'package:dribbble/diary/utils/dialog_utils.dart';
 import 'package:dribbble/diary/utils/keyboard.dart';
 import 'package:dribbble/diary/widgets/edit/edit_demo3.dart';
 import 'package:dribbble/diary/widgets/edit/toolbar/history.dart';
@@ -69,18 +68,6 @@ class _ToolbarState extends State<Toolbar> {
   void dispose() {
     keyboardSubscription.cancel();
     super.dispose();
-  }
-
-  @override
-  void activate() {
-    super.activate();
-    print('-----activate toolbar');
-  }
-
-  @override
-  void deactivate() {
-    super.deactivate();
-    print('-----deactivate toolbar');
   }
 
   @override

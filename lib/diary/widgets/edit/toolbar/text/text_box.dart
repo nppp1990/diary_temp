@@ -64,7 +64,7 @@ class _ToolTextBoxState extends State<ToolTextBox> {
                 height: TestConfiguration.boxItemSize1 * 0.8,
                 color: TestColors.greyDivider1,
               ),
-              ListItems(selected: _getListType(), onListChanged: _updateList),
+              Expanded(child: ListItems(selected: _getListType(), onListChanged: _updateList)),
             ],
           ),
           const SizedBox(height: TestConfiguration.boxItemPadding),
@@ -89,7 +89,6 @@ class _ToolTextBoxState extends State<ToolTextBox> {
               StrikeThroughItem(controller: controller),
             ],
           )
-
         ],
       ),
     );
@@ -170,12 +169,18 @@ class _ToolTextBoxState extends State<ToolTextBox> {
   }
 
   ListType? _getListType() {
-    if (controller.getSelectionStyle().attributes.containsKey(Attribute.list.key)) {
+    var attrs = controller.getSelectionStyle().attributes;
+    if (attrs.containsKey(Attribute.blockQuote.key)) {
+      return ListType.quote;
+    }
+    if (attrs.containsKey(Attribute.list.key)) {
       var list = controller.getSelectionStyle().attributes[Attribute.list.key];
       if (list == Attribute.ol) {
         return ListType.ol;
       } else if (list == Attribute.ul) {
         return ListType.ul;
+      } else if (list == Attribute.checked || list == Attribute.unchecked) {
+        return ListType.check;
       } else {
         return null;
       }
@@ -184,9 +189,18 @@ class _ToolTextBoxState extends State<ToolTextBox> {
     }
   }
 
+  bool _isChecked(Map<String, Attribute> attrs) {
+    var attribute = attrs[Attribute.list.key];
+    if (attribute == null) {
+      return false;
+    }
+    return attribute.value == Attribute.unchecked.value || attribute.value == Attribute.checked.value;
+  }
+
   void _updateList(ListType? type) {
     if (type == null) {
       controller.formatSelection(Attribute.clone(Attribute.list, null));
+      controller.formatSelection(Attribute.clone(Attribute.blockQuote, null));
       return;
     }
     switch (type) {
@@ -196,7 +210,14 @@ class _ToolTextBoxState extends State<ToolTextBox> {
       case ListType.ul:
         controller.formatSelection(Attribute.ul);
         break;
+      case ListType.check:
+        controller.formatSelection(Attribute.unchecked);
+        // var current = _isChecked(controller.getSelectionStyle().attributes);
+        // controller.formatSelection(current ? Attribute.clone(Attribute.unchecked, null) : Attribute.unchecked);
+        break;
+      case ListType.quote:
+        controller.formatSelection(Attribute.blockQuote);
+        break;
     }
   }
-
 }

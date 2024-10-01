@@ -6,6 +6,8 @@ import 'icon_item.dart';
 enum ListType {
   ol,
   ul,
+  check,
+  quote,
 }
 
 class ListItems extends StatefulWidget {
@@ -39,19 +41,36 @@ class _ListItemsState extends State<ListItems> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconItem(
-            icon: 'assets/icons/ic_list_ol.svg',
-            selected: _selected == ListType.ol,
-            onPressed: () => _onListChanged(ListType.ol)),
-        const SizedBox(width: TestConfiguration.boxItemPadding),
-        IconItem(
-            icon: 'assets/icons/ic_list_ul.svg',
-            selected: _selected == ListType.ul,
-            onPressed: () => _onListChanged(ListType.ul)),
-      ],
+    return Scrollbar(
+      thickness: 1,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconItem(
+                icon: 'assets/icons/ic_list_ol.svg',
+                selected: _selected == ListType.ol,
+                onPressed: () => _onListChanged(ListType.ol)),
+            const SizedBox(width: TestConfiguration.boxItemPadding),
+            IconItem(
+                icon: 'assets/icons/ic_list_ul.svg',
+                selected: _selected == ListType.ul,
+                onPressed: () => _onListChanged(ListType.ul)),
+            const SizedBox(width: TestConfiguration.boxItemPadding),
+            IconItem(
+                icon: 'assets/icons/ic_check_list.svg',
+                selected: _selected == ListType.check,
+                onPressed: () => _onListChanged(ListType.check)),
+            const SizedBox(width: TestConfiguration.boxItemPadding),
+            IconItem(
+                iconScale: 0.8,
+                icon: 'assets/icons/ic_quote.svg',
+                selected: _selected == ListType.quote,
+                onPressed: () => _onListChanged(ListType.quote)),
+          ],
+        ),
+      ),
     );
   }
 
