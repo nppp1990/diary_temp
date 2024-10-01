@@ -25,6 +25,13 @@ class _TemplateListPageState extends State<TemplateListPage> {
     //     desc: 'A simple template to record your day',
     //     backgroundColor: const Color(0xFFF8F8F8)),
     Template(
+      name: 'Day Summary',
+      isBuiltIn: true,
+      data:
+          r'[{"insert":"Day Summary"},{"insert":"\n","attributes":{"header":2}},{"insert":"\nAny notable things happen today?"},{"insert":"\n","attributes":{"blockquote":true}},{"insert":"\n\nI’ve been thinking about…"},{"insert":"\n","attributes":{"blockquote":true}},{"insert":"\n\nWhat’s next?"},{"insert":"\n","attributes":{"blockquote":true}},{"insert":"\n\n1"},{"insert":"\n","attributes":{"list":"unchecked"}},{"insert":"2"},{"insert":"\n","attributes":{"list":"unchecked"}},{"insert":"3"},{"insert":"\n","attributes":{"list":"unchecked"}}]',
+      backgroundImage: 'assets/images/template_bg1.jpg',
+    ),
+    Template(
         name: 'Gratitude',
         isBuiltIn: true,
         data:

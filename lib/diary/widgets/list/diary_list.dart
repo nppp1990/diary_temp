@@ -18,7 +18,13 @@ class BaseListView extends StatelessWidget {
     for (var record in records) {
       switch (record.type) {
         case RecordType.event:
-          data.add(TestInfo(type: RecordType.event, note: record.content, time: record.time));
+          data.add(
+            TestInfo(
+              type: RecordType.event,
+              note: record.content,
+              time: record.time,
+            ),
+          );
           break;
         case RecordType.mood:
           data.add(TestInfo(
@@ -35,9 +41,8 @@ class BaseListView extends StatelessWidget {
             moodIndex: record.mood,
             note: record.diaryPlainText,
             time: record.time,
-            // todo: checkCount and checkedCount
-            checkCount: 1,
-            checkedCount: 2,
+            checkCount: record.checkCount == 0 ? null : record.checkCount,
+            checkedCount: record.checkCount == 0 ? null : record.checkedCount,
           ));
           break;
       }
@@ -53,7 +58,7 @@ class BaseListView extends StatelessWidget {
   Widget build(BuildContext context) {
     print('----build FutureLoading');
     return FutureLoading<List<DiaryRecord>, Map<DateTime, List<DiaryRecord>>>(
-      futureBuilder: ()=> RecordManager().getAllRecord(),
+      futureBuilder: () => RecordManager().getAllRecord(),
       convert: DocUtils.groupRecordsByDate,
       contentBuilder: (context, recordMap) {
         return contentBuilder(context, recordMap);
@@ -200,7 +205,6 @@ class _TestItemState extends State<_TestItem> {
   late List<TestInfo> _data;
   late List<DiaryRecord> _records;
 
-
   void _initData() {
     _data = widget.data;
     _records = widget.records;
@@ -249,7 +253,6 @@ class _TestItemState extends State<_TestItem> {
         _topPosition[i] = _topPosition[i - 1] + _data[i - 1].itemHeight! + TestListView.itemSpace;
       }
     }
-    print('----build _TestItem---size: ${_data.length}');
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -505,8 +508,8 @@ class DiaryItem extends StatelessWidget {
         note: note,
         dateTime: dateTime,
         moodIndex: moodIndex,
-        checkCount: 1,
-        checkedCount: 2,
+        checkCount: checkCount,
+        checkedCount: checkedCount,
       ),
     );
   }
@@ -557,16 +560,16 @@ class DiaryContentItem extends StatelessWidget {
   final String note;
   final DateTime dateTime;
   final int? moodIndex;
-  final int checkCount;
-  final int checkedCount;
+  final int? checkCount;
+  final int? checkedCount;
 
   const DiaryContentItem({
     super.key,
     required this.note,
     required this.dateTime,
     required this.moodIndex,
-    required this.checkCount,
-    required this.checkedCount,
+    this.checkCount,
+    this.checkedCount,
   });
 
   @override

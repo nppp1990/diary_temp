@@ -187,6 +187,8 @@ class TestEditState extends State<TestEdit> {
       bgImage = bgInfo.assetImage?.assetName;
     }
 
+    // print('-----data:\n${jsonEncode(delta.toJson())}');
+
     DiaryRecord record = DiaryRecord(
       type: RecordType.diary,
       id: widget.record?.id,
@@ -196,11 +198,11 @@ class TestEditState extends State<TestEdit> {
       backgroundImage: bgImage,
       time: _time,
     );
-    // if (record.id == null) {
-    //   RecordManager().insertRecord(record);
-    // } else {
-    //   RecordManager().updateRecord(record);
-    // }
+    if (record.id == null) {
+      RecordManager().insertRecord(record);
+    } else {
+      RecordManager().updateRecord(record);
+    }
   }
 
   void _loadDoc(String? json) {
@@ -304,7 +306,7 @@ class TestEditState extends State<TestEdit> {
                   icon: const Icon(Icons.check),
                   onPressed: () {
                     _saveDoc();
-                    Navigator.pop(context);
+                    // Navigator.pop(context);
                   },
                 ),
               ],

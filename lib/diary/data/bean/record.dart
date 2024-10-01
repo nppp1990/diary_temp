@@ -16,6 +16,8 @@ class DiaryRecord {
   final DateTime time;
   final String? content;
   String? diaryPlainText;
+  int? checkedCount;
+  int? checkCount;
 
   // just for diary and mood
   final int? mood;

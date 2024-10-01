@@ -3,10 +3,10 @@ import 'dart:convert';
 
 import 'package:dribbble/diary/data/bean/record.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
 
 abstract class DocUtils {
-
   static double calculateTextHeight({
     required String text,
     required TextStyle style,
@@ -25,7 +25,7 @@ abstract class DocUtils {
     // print('-----computeLineMetrics: $computeLineMetrics');
     // print('-----length: ${computeLineMetrics.length}');
     // for (var line in computeLineMetrics) {
-      // print('-----line: $line');
+    // print('-----line: $line');
     // }
     // get height
     return computeLineMetrics.fold(0, (previousValue, element) => previousValue + element.height);
@@ -43,6 +43,34 @@ abstract class DocUtils {
     )..layout(maxWidth: maxWidth);
 
     return textPainter.computeLineMetrics();
+  }
+
+  static parseDocInfo(String deltaJson) {
+    final delta = Delta.fromJson(jsonDecode(deltaJson));
+    String allText = '';
+    int checkCount = 0;
+    int checkedCount = 0;
+    // int textLength = 0;
+    // int imageCount = 0;
+    for (final op in delta.operations) {
+      if (op.isInsert) {
+        allText += op.value;
+        var attrs = op.attributes;
+        if (attrs != null) {
+          if (attrs.containsKey(Attribute.unchecked.key)) {
+            checkCount++;
+          } else if (attrs.containsKey(Attribute.checked.key)) {
+            checkCount++;
+            checkedCount++;
+          }
+        }
+      }
+    }
+    return {
+      'allText': allText,
+      'checkCount': checkCount,
+      'checkedCount': checkedCount,
+    };
   }
 
   static String getPlainTextFromJson(String deltaJson) {
@@ -74,7 +102,10 @@ abstract class DocUtils {
     for (var record in records) {
       DateTime date = DateTime(record.time.year, record.time.month, record.time.day);
       if (record.type == RecordType.diary && record.diaryPlainText == null) {
-        record.diaryPlainText = getPlainTextFromJson(record.content!);
+        var info = parseDocInfo(record.content!);
+        record.diaryPlainText = info['allText'];
+        record.checkCount = info['checkCount'];
+        record.checkedCount = info['checkedCount'];
       }
       if (map.containsKey(date)) {
         map[date]!.add(record);
@@ -107,6 +138,4 @@ abstract class DocUtils {
     }
     return totalMood ~/ count;
   }
-
-
 }

@@ -95,8 +95,8 @@ class _TestItem2 extends StatelessWidget {
             note: item.note!,
             dateTime: item.time,
             moodIndex: item.moodIndex,
-            checkedCount: 1,
-            checkCount: 2,
+            checkedCount: item.checkedCount,
+            checkCount: item.checkCount,
           ),
         );
     }
