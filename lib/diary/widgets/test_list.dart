@@ -1,6 +1,9 @@
 import 'package:dribbble/diary/widgets/list/diary_list.dart';
 import 'package:flutter/material.dart';
 
+import 'list/diary_list2.dart';
+import 'list/diary_list3.dart';
+
 class TestListPage extends StatelessWidget {
   const TestListPage({super.key});
 
@@ -17,18 +20,34 @@ class TestListPage extends StatelessWidget {
   }
 }
 
-class _TestListItem extends StatelessWidget {
-  final String title;
-  final VoidCallback? onTap;
-
-  const _TestListItem({required this.title, this.onTap});
+class TestListPage2 extends StatelessWidget {
+  const TestListPage2({super.key});
 
   @override
   Widget build(BuildContext context) {
-    print('------_TestListItem build: $title');
-    return ListTile(
-      title: Text(title),
-      onTap: onTap,
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text('Test List2'),
+        ),
+        body: const Center(
+          child: TestListView2(),
+        )
+    );
+  }
+}
+
+class TestListPage3 extends StatelessWidget {
+  const TestListPage3({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text('Test List3'),
+        ),
+        body: const Center(
+          child: TestListView3(),
+        )
     );
   }
 }

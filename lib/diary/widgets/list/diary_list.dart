@@ -12,6 +12,56 @@ import 'package:dribbble/diary/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
+class BaseListView extends StatelessWidget {
+  static List<TestInfo> generateTestListData(List<DiaryRecord> records) {
+    List<TestInfo> data = [];
+    for (var record in records) {
+      switch (record.type) {
+        case RecordType.event:
+          data.add(TestInfo(type: RecordType.event, note: record.content, time: record.time));
+          break;
+        case RecordType.mood:
+          data.add(TestInfo(
+            type: RecordType.mood,
+            moodIndex: record.mood,
+            note: record.content,
+            isOneDayMood: record.moodForAllDay,
+            time: record.time,
+          ));
+          break;
+        case RecordType.diary:
+          data.add(TestInfo(
+            type: RecordType.diary,
+            moodIndex: record.mood,
+            note: record.diaryPlainText,
+            time: record.time,
+            // todo: checkCount and checkedCount
+            checkCount: 1,
+            checkedCount: 2,
+          ));
+          break;
+      }
+    }
+    return data;
+  }
+
+  final Widget Function(BuildContext, Map<DateTime, List<DiaryRecord>>) contentBuilder;
+
+  const BaseListView({super.key, required this.contentBuilder});
+
+  @override
+  Widget build(BuildContext context) {
+    print('----build FutureLoading');
+    return FutureLoading<List<DiaryRecord>, Map<DateTime, List<DiaryRecord>>>(
+      futureBuilder: ()=> RecordManager().getAllRecord(),
+      convert: DocUtils.groupRecordsByDate,
+      contentBuilder: (context, recordMap) {
+        return contentBuilder(context, recordMap);
+      },
+    );
+  }
+}
+
 class TestListView extends StatefulWidget {
   static const borderRadius = 20.0;
   static const borderWidth = 1.0;
@@ -42,31 +92,38 @@ class TestListView extends StatefulWidget {
 class _TestListViewState extends State<TestListView> {
   @override
   Widget build(BuildContext context) {
+    print('----build TestListView');
     var width = MediaQuery.sizeOf(context).width - TestListView.leftSize - TestConfiguration.pagePadding;
-    return FutureLoading<List<DiaryRecord>, Map<DateTime, List<DiaryRecord>>>(
-      futureBuilder: RecordManager().getAllRecord,
-      convert: DocUtils.groupRecordsByDate,
-      contentBuilder: (context, recordMap) {
-        return ListView.builder(
-          itemCount: recordMap.length,
-          itemBuilder: (context, index) {
-            List<DiaryRecord> records = recordMap.values.elementAt(index);
-            DateTime dateTime = recordMap.keys.elementAt(index);
-            return _TestItem(width: width, dateTime: dateTime, records: records);
-          },
-        );
-      },
-    );
+    return BaseListView(contentBuilder: (context, recordMap) {
+      print('-----build contentBuilder: ${recordMap.length}----');
+      return ListView.builder(
+        itemCount: recordMap.length,
+        itemBuilder: (context, index) {
+          List<DiaryRecord> records = recordMap.values.elementAt(index);
+          DateTime dateTime = recordMap.keys.elementAt(index);
+          print('-----2222----records: ${records.length}');
+          return _TestItem(
+            width: width,
+            dateTime: dateTime,
+            records: records,
+            data: BaseListView.generateTestListData(records),
+            refresh: () {
+              setState(() {});
+            },
+          );
+        },
+      );
+    });
   }
 }
 
-class _LeftDateItem extends StatelessWidget {
+class LeftDateItem extends StatelessWidget {
   final DateTime dateTime;
   final int? moodIndex;
 
   static const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  const _LeftDateItem({required this.dateTime, this.moodIndex});
+  const LeftDateItem({super.key, required this.dateTime, this.moodIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -91,6 +148,7 @@ class _LeftDateItem extends StatelessWidget {
               width: 40,
               height: 40,
             ),
+          const SizedBox(height: 10),
         ],
       ),
     );
@@ -98,16 +156,22 @@ class _LeftDateItem extends StatelessWidget {
 }
 
 class _TestItem extends StatefulWidget {
+  final Function()? refresh;
   final double width;
   final DateTime dateTime;
   final List<DiaryRecord> records;
+  final List<TestInfo> data;
 
-  const _TestItem({required this.width, required this.dateTime, required this.records});
+  const _TestItem({
+    this.refresh,
+    required this.width,
+    required this.dateTime,
+    required this.records,
+    required this.data,
+  });
 
   @override
-  State<StatefulWidget> createState() {
-    return _TestItemState();
-  }
+  State<StatefulWidget> createState() => _TestItemState();
 }
 
 class TestInfo {
@@ -117,6 +181,7 @@ class TestInfo {
   final int? checkedCount;
   final int? checkCount;
   final bool? isOneDayMood;
+  final DateTime time;
   double? itemHeight;
 
   TestInfo({
@@ -126,78 +191,69 @@ class TestInfo {
     this.checkedCount,
     this.checkCount,
     this.isOneDayMood,
+    required this.time,
   });
 }
 
 class _TestItemState extends State<_TestItem> {
-  final List<TestInfo> data = [];
-
   late List<double> _topPosition;
+  late List<TestInfo> _data;
+  late List<DiaryRecord> _records;
+
+
+  void _initData() {
+    _data = widget.data;
+    _records = widget.records;
+    _topPosition = List.filled(_data.length, 0);
+    print('----initData: ${_data.length}');
+  }
 
   @override
   void initState() {
     super.initState();
     _initData();
-    // _test();
   }
 
-  _initData() {
-    data.clear();
-    for (var record in widget.records) {
-      switch (record.type) {
-        case RecordType.event:
-          data.add(TestInfo(type: RecordType.event, note: record.content));
-          break;
-        case RecordType.mood:
-          data.add(TestInfo(
-            type: RecordType.mood,
-            moodIndex: record.mood,
-            note: record.content,
-            isOneDayMood: record.moodForAllDay,
-          ));
-          break;
-        case RecordType.diary:
-          data.add(TestInfo(
-              type: RecordType.diary,
-              moodIndex: record.mood,
-              note: record.diaryPlainText,
-              checkCount: 1,
-              checkedCount: 2));
-          break;
-      }
+  @override
+  void didUpdateWidget(covariant _TestItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    print('----didUpdateWidget');
+    if (oldWidget.data != widget.data || oldWidget.records != widget.records) {
+      print('----didUpdateWidget refresh: ${widget.records.length}');
+      _initData();
     }
-    _topPosition = List.filled(data.length, 0);
   }
 
   @override
   Widget build(BuildContext context) {
-    for (int i = 0; i < data.length; i++) {
-      if (data[i].itemHeight == null) {
-        switch (data[i].type) {
+    for (int i = 0; i < _data.length; i++) {
+      if (_data[i].itemHeight == null) {
+        switch (_data[i].type) {
           case RecordType.event:
-            data[i].itemHeight = _calTaskItemHeight(data[i].note!, widget.width);
+            _data[i].itemHeight = _calTaskItemHeight(_data[i].note!, widget.width);
             // print('1----i: $i, height: ${data[i].itemHeight}');
             break;
           case RecordType.mood:
-            data[i].itemHeight = _calMoodItemHeight(data[i].note, widget.width);
+            _data[i].itemHeight = _calMoodItemHeight(_data[i].note, widget.width);
             // print('2----i: $i, height: ${data[i].itemHeight}');
             break;
           case RecordType.diary:
-            data[i].itemHeight = _calDiaryItemHeight(data[i].note!, widget.width, data[i].moodIndex);
+            _data[i].itemHeight = _calDiaryItemHeight(_data[i].note!, widget.width, _data[i].moodIndex);
             // print('3----i: $i, height: ${data[i].itemHeight}');
             break;
         }
       }
     }
     if (_topPosition.last == 0 && _topPosition.length > 1) {
-      for (int i = 1; i < data.length; i++) {
-        _topPosition[i] = _topPosition[i - 1] + data[i - 1].itemHeight! + TestListView.itemSpace;
+      for (int i = 1; i < _data.length; i++) {
+        _topPosition[i] = _topPosition[i - 1] + _data[i - 1].itemHeight! + TestListView.itemSpace;
       }
     }
+    print('----build _TestItem---size: ${_data.length}');
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _LeftDateItem(dateTime: widget.dateTime, moodIndex: DocUtils.getDayMood(widget.records)),
+        LeftDateItem(dateTime: widget.dateTime, moodIndex: DocUtils.getDayMood(_records)),
         SizedBox(
           width: widget.width,
           child: Padding(
@@ -207,7 +263,7 @@ class _TestItemState extends State<_TestItem> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  for (int i = 0; i < data.length; i++) ...[
+                  for (int i = 0; i < _data.length; i++) ...[
                     _buildItem(i),
                     const SizedBox(height: TestListView.itemSpace),
                   ]
@@ -221,37 +277,54 @@ class _TestItemState extends State<_TestItem> {
     );
   }
 
+  void _onLongPress(int index) async {
+    print('long press index: $index');
+    var res = await RecordManager().deleteRecord(_records[index].id);
+    // todo test
+    await Future.delayed(const Duration(milliseconds: 1500));
+    if (res > 0) {
+      print('delete success');
+      // todo
+      widget.refresh?.call();
+    } else {
+      print('delete failed');
+    }
+  }
+
   Widget _buildItem(int index) {
-    final item = data[index];
+    final item = _data[index];
     switch (item.type) {
       case RecordType.event:
         return EventItem(
           width: widget.width,
           height: item.itemHeight,
           note: item.note!,
-          dateTime: DateTime.now(),
+          dateTime: item.time,
           angle: _getAngle(index),
+          onLongPress: () => _onLongPress(index),
         );
       case RecordType.mood:
         return MoodItem(
           width: widget.width,
           height: item.itemHeight,
           note: item.note,
-          dateTime: DateTime.now(),
+          dateTime: item.time,
           moodIndex: item.moodIndex!,
           angle: _getAngle(index),
           isOneDayMood: item.isOneDayMood,
+          onLongPress: () => _onLongPress(index),
         );
       case RecordType.diary:
         return DiaryItem(
           width: widget.width,
           height: item.itemHeight,
           note: item.note!,
-          dateTime: DateTime.now(),
+          dateTime: item.time,
           moodIndex: item.moodIndex,
           checkCount: item.checkCount,
           checkedCount: item.checkedCount,
           angle: _getAngle(index),
+          onLongPress: () => _onLongPress(index),
         );
     }
   }
@@ -403,6 +476,8 @@ class DiaryItem extends StatelessWidget {
   final int? moodIndex;
   final int? checkCount;
   final int? checkedCount;
+  final GestureTapCallback? onTap;
+  final GestureLongPressCallback? onLongPress;
 
   const DiaryItem({
     super.key,
@@ -414,32 +489,26 @@ class DiaryItem extends StatelessWidget {
     required this.moodIndex,
     required this.checkCount,
     required this.checkedCount,
+    this.onTap,
+    this.onLongPress,
   });
 
   @override
   Widget build(BuildContext context) {
     return ListItem(
-        width: width,
-        height: height,
-        angle: angle,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (moodIndex != null) ...[
-              _MoodTextLayout(moodIndex: moodIndex!),
-              const SizedBox(height: 8),
-            ],
-            Text(
-              note,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: TestListView.itemTextSize, height: TestListView.itemTextHeight),
-            ),
-            const SizedBox(height: 8),
-            _BottomTimeLayout(
-                itemType: RecordType.diary, dateTime: dateTime, checkCount: checkCount, checkedCount: checkedCount),
-          ],
-        ));
+      width: width,
+      height: height,
+      angle: angle,
+      onTap: onTap,
+      onLongPress: onLongPress,
+      child: DiaryContentItem(
+        note: note,
+        dateTime: dateTime,
+        moodIndex: moodIndex,
+        checkCount: 1,
+        checkedCount: 2,
+      ),
+    );
   }
 }
 
@@ -451,6 +520,8 @@ class MoodItem extends StatelessWidget {
   final int moodIndex;
   final String? note;
   final bool? isOneDayMood;
+  final GestureTapCallback? onTap;
+  final GestureLongPressCallback? onLongPress;
 
   const MoodItem({
     super.key,
@@ -461,6 +532,8 @@ class MoodItem extends StatelessWidget {
     required this.moodIndex,
     this.note,
     this.isOneDayMood,
+    this.onTap,
+    this.onLongPress,
   });
 
   @override
@@ -469,27 +542,121 @@ class MoodItem extends StatelessWidget {
         width: width,
         height: height,
         angle: angle,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _MoodTextLayout(moodIndex: moodIndex),
-            if (note != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                note!,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: TestListView.itemTextSize, height: TestListView.itemTextHeight),
-              ),
-            ],
-            const SizedBox(height: 8),
-            _BottomTimeLayout(
-              itemType: RecordType.mood,
-              dateTime: dateTime,
-              isOneDayMood: isOneDayMood,
-            ),
-          ],
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: MoodContentItem(
+          moodIndex: moodIndex,
+          note: note,
+          dateTime: dateTime,
+          isOneDayMood: isOneDayMood,
         ));
+  }
+}
+
+class DiaryContentItem extends StatelessWidget {
+  final String note;
+  final DateTime dateTime;
+  final int? moodIndex;
+  final int checkCount;
+  final int checkedCount;
+
+  const DiaryContentItem({
+    super.key,
+    required this.note,
+    required this.dateTime,
+    required this.moodIndex,
+    required this.checkCount,
+    required this.checkedCount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (moodIndex != null) ...[
+          MoodTextLayout(moodIndex: moodIndex!),
+          const SizedBox(height: 8),
+        ],
+        Text(
+          note,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: TestListView.itemTextSize, height: TestListView.itemTextHeight),
+        ),
+        const SizedBox(height: 8),
+        BottomTimeLayout(
+            itemType: RecordType.diary, dateTime: dateTime, checkCount: checkCount, checkedCount: checkedCount),
+      ],
+    );
+  }
+}
+
+class EventContentItem extends StatelessWidget {
+  final String note;
+  final DateTime dateTime;
+
+  const EventContentItem({
+    super.key,
+    required this.note,
+    required this.dateTime,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          note,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: TestListView.itemTextSize, height: TestListView.itemTextHeight),
+        ),
+        const SizedBox(height: 8),
+        BottomTimeLayout(itemType: RecordType.event, dateTime: dateTime),
+      ],
+    );
+  }
+}
+
+class MoodContentItem extends StatelessWidget {
+  final int moodIndex;
+  final String? note;
+  final DateTime dateTime;
+  final bool? isOneDayMood;
+
+  const MoodContentItem({
+    super.key,
+    required this.moodIndex,
+    this.note,
+    required this.dateTime,
+    this.isOneDayMood,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        MoodTextLayout(moodIndex: moodIndex),
+        if (note != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            note!,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: TestListView.itemTextSize, height: TestListView.itemTextHeight),
+          ),
+        ],
+        const SizedBox(height: 8),
+        BottomTimeLayout(
+          itemType: RecordType.mood,
+          dateTime: dateTime,
+          isOneDayMood: isOneDayMood,
+        ),
+      ],
+    );
   }
 }
 
@@ -500,6 +667,8 @@ class EventItem extends StatelessWidget {
   final DateTime dateTime;
   final int maxLines;
   final double angle;
+  final GestureTapCallback? onTap;
+  final GestureLongPressCallback? onLongPress;
 
   const EventItem({
     super.key,
@@ -509,6 +678,8 @@ class EventItem extends StatelessWidget {
     required this.dateTime,
     this.maxLines = 3,
     this.angle = 0,
+    this.onLongPress,
+    this.onTap,
   });
 
   @override
@@ -517,27 +688,17 @@ class EventItem extends StatelessWidget {
       width: width,
       height: height,
       angle: angle,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            note,
-            maxLines: maxLines,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: TestListView.itemTextSize, height: TestListView.itemTextHeight),
-          ),
-          const SizedBox(height: 8),
-          _BottomTimeLayout(itemType: RecordType.event, dateTime: dateTime),
-        ],
-      ),
+      onLongPress: onLongPress,
+      onTap: onTap,
+      child: EventContentItem(note: note, dateTime: dateTime),
     );
   }
 }
 
-class _MoodTextLayout extends StatelessWidget {
+class MoodTextLayout extends StatelessWidget {
   final int moodIndex;
 
-  const _MoodTextLayout({required this.moodIndex});
+  const MoodTextLayout({super.key, required this.moodIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -562,14 +723,15 @@ class _MoodTextLayout extends StatelessWidget {
   }
 }
 
-class _BottomTimeLayout extends StatelessWidget {
+class BottomTimeLayout extends StatelessWidget {
   final RecordType itemType;
   final DateTime dateTime;
   final int? checkCount;
   final int? checkedCount;
   final bool? isOneDayMood;
 
-  const _BottomTimeLayout({
+  const BottomTimeLayout({
+    super.key,
     required this.itemType,
     required this.dateTime,
     this.checkCount,
@@ -650,12 +812,16 @@ class ListItem extends StatelessWidget {
   final double? height;
   final double angle;
   final Widget child;
+  final GestureTapCallback? onTap;
+  final GestureLongPressCallback? onLongPress;
 
   const ListItem({
     super.key,
     required this.width,
     this.height,
     required this.angle,
+    this.onTap,
+    this.onLongPress,
     required this.child,
   });
 
@@ -677,12 +843,8 @@ class ListItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(TestListView.borderRadius),
           child: InkWell(
             borderRadius: BorderRadius.circular(TestListView.borderRadius),
-            onTap: () {
-              print('---onTap');
-            },
-            onLongPress: () {
-              print('---onLongPress');
-            },
+            onTap: onTap,
+            onLongPress: onLongPress,
             child: Container(
               width: width,
               decoration: BoxDecoration(

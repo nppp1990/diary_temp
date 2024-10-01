@@ -147,6 +147,18 @@ class _MyHomePageState extends State<MyHomePage> {
         MaterialPageRoute(builder: (context) => const TestListPage()),
       );
     }),
+    ListItem('test list2', (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const TestListPage2()),
+      );
+    }),
+    ListItem('test list3', (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const TestListPage3()),
+      );
+    }),
   ];
 
   @override

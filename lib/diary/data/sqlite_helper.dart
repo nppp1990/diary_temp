@@ -120,6 +120,7 @@ class RecordManager {
 
 
   Future<List<DiaryRecord>> getAllRecord() async {
+    print('-------getAllRecord');
     final db = await TestSqliteHelper.instance.database;
     try {
       // 按时间倒序
@@ -153,6 +154,22 @@ class RecordManager {
       final db = await TestSqliteHelper.instance.database;
       final id = await db.insert(recordTableName, record.toMap());
       return id;
+    } catch (e) {
+      return -1;
+    }
+  }
+
+  Future<int> deleteRecord(int? id) async {
+    if (id == null) {
+      return -1;
+    }
+    final db = await TestSqliteHelper.instance.database;
+    try {
+      return await db.delete(
+        recordTableName,
+        where: '$recordId = ?',
+        whereArgs: [id],
+      );
     } catch (e) {
       return -1;
     }

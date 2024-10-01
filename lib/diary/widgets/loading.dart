@@ -30,18 +30,10 @@ class FutureLoading<T, U> extends StatefulWidget {
 }
 
 class _FutureLoadingState<T, U> extends State<FutureLoading<T, U>> {
-  late Future<T> _future;
-
-  @override
-  void initState() {
-    super.initState();
-    _future = widget.futureBuilder();
-  }
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: _future,
+        future: widget.futureBuilder(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             const loadingView = Center(
@@ -76,9 +68,7 @@ class _FutureLoadingState<T, U> extends State<FutureLoading<T, U>> {
                   // retry
                   TextButton(
                     onPressed: () {
-                      setState(() {
-                        _future = widget.futureBuilder();
-                      });
+                      setState(() {});
                     },
                     child: const Text('Retry', style: TextStyle(color: TestColors.primary)),
                   ),
