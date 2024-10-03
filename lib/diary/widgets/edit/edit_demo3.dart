@@ -110,11 +110,15 @@ class TestEditState extends State<TestEdit> {
     _showEmotionDialogNotifier.value = show;
   }
 
-  void insertTemplate(String data) {
-    var doc = Document.fromJson(jsonDecode(data));
+  void insertTemplate(Template template) {
+    var doc = Document.fromJson(jsonDecode(template.data));
     final int index = controller.selection.baseOffset;
     controller.skipRequestKeyboard = true;
     controller.replaceText(index, 0, doc.toDelta(), TextSelection.collapsed(offset: index + doc.length));
+    backgroundController.changeBackground(BackgroundInfo(
+      backgroundColor: template.backgroundColor,
+      assetImage: template.backgroundImage == null ? null : AssetImage(template.backgroundImage!),
+    ));
   }
 
   void _formatTitle() {
@@ -276,7 +280,12 @@ class TestEditState extends State<TestEdit> {
               backgroundColor: Colors.transparent,
               iconTheme: TestConfiguration.toolbarIconStyle,
               forceMaterialTransparency: true,
-              title: const Text('Edit'),
+              title: DiaryTimeSelector(
+                time: DateTime.now(),
+                onChanged: (time) {
+                  print('----time changed: $time');
+                },
+              ),
               actions: [
                 PopupMenuButton(
                   icon: const Icon(Icons.more_vert),
@@ -371,7 +380,10 @@ class TestEditState extends State<TestEdit> {
                         ? SecondDialog(
                             title: 'Background',
                             child: BackgroundSelector(
-                              controller: backgroundController,
+                              backgroundInfo: backgroundController.backgroundInfo.value,
+                              onBackgroundChanged: (info) {
+                                backgroundController.changeBackground(info);
+                              },
                             ),
                             onDismiss: () {
                               showBackgroundDialog(false);

@@ -79,12 +79,14 @@ class _ItemsActionButtonState extends State<_ItemsActionButton> with SingleTicke
               // 这里就是乱写
               bottom: 280,
               child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: _removeOverlay,
               ),
             ),
             Positioned.fill(
               right: 150,
               child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: _removeOverlay,
               ),
             ),

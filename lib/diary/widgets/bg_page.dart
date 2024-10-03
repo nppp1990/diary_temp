@@ -54,33 +54,40 @@ class _PageBackgroundState extends State<PageBackground> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-        valueListenable: widget.controller.backgroundInfo,
-        builder: (context, info, child) {
-          final bool isColorBackground = info == null || info.isColor;
-          return Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Container(
-              decoration: BoxDecoration(
-                color: isColorBackground ? info?.backgroundColor ?? Colors.white : null,
-                image: isColorBackground
-                    ? null
-                    : DecorationImage(
-                        image: info.assetImage!,
-                        fit: BoxFit.cover,
-                      ),
-              ),
-              child: Column(
-                children: [
-                  if (widget.appBar != null) widget.appBar!,
-                  Expanded(
-                    child: child!,
+    return Stack(
+      children: [
+        ValueListenableBuilder(
+            valueListenable: widget.controller.backgroundInfo,
+            builder: (context, info, child) {
+              final bool isColorBackground = info == null || info.isColor;
+              return Scaffold(
+                resizeToAvoidBottomInset: false,
+                backgroundColor: Colors.transparent,
+                body: Container(
+                  decoration: BoxDecoration(
+                    color: isColorBackground ? info?.backgroundColor ?? Colors.white : null,
+                    image: isColorBackground
+                        ? null
+                        : DecorationImage(
+                            image: info.assetImage!,
+                            fit: BoxFit.cover,
+                          ),
                   ),
-                ],
+                ),
+              );
+            }),
+        Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Column(
+            children: [
+              if (widget.appBar != null) widget.appBar!,
+              Expanded(
+                child: widget.child,
               ),
-            ),
-          );
-        },
-        child: widget.child);
+            ],
+          ),
+        )
+      ],
+    );
   }
 }

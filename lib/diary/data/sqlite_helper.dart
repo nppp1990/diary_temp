@@ -1,3 +1,4 @@
+import 'package:dribbble/diary/data/bean/folder.dart';
 import 'package:dribbble/diary/data/bean/template.dart';
 import 'package:dribbble/diary/data/bean/record.dart';
 import 'package:path/path.dart';
@@ -32,7 +33,12 @@ class TestSqliteHelper {
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+    return await openDatabase(
+      path,
+      version: 1,
+      onCreate: _createDB,
+      onUpgrade: _onUpgrade,
+    );
   }
 
   static const _idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
@@ -42,6 +48,7 @@ class TestSqliteHelper {
   static const _intType = 'INTEGER';
 
   Future _createDB(Database db, int version) async {
+    print('-------createDB');
     await db.execute('''
       CREATE TABLE $templateTableName (
         $templateId $_idType,
@@ -64,6 +71,29 @@ class TestSqliteHelper {
         ${RecordManager.recordBackgroundImage} $_textType
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE ${FolderManager.folderTableName} (
+        ${FolderManager.folderId} $_idType,
+        ${FolderManager.folderName} $_textTypeNotNull UNIQUE,
+        ${FolderManager.folderDiaryCount} $_intTypeNotNull,
+        ${FolderManager.folderBackgroundImage} $_textType,
+        ${FolderManager.folderBackgroundColor} $_textType
+      )
+    ''');
+  }
+
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    // if (oldVersion == 1 && newVersion == 2) {
+    //   await db.execute('''
+    //     ALTER TABLE ${RecordManager.recordTableName}
+    //     ADD COLUMN ${RecordManager.recordBackgroundColor} $_textType
+    //   ''');
+    //   await db.execute('''
+    //     ALTER TABLE ${RecordManager.recordTableName}
+    //     ADD COLUMN ${RecordManager.recordBackgroundImage} $_textType
+    //   ''');
+    // }
   }
 
   Future<List<Template>> getAllTemplates() async {
@@ -110,6 +140,8 @@ class RecordManager {
   /// [DiaryRecord] table fields
   static const String recordTableName = 'record';
   static const String recordId = 'id';
+  static const String recordFolderId = 'folderId';
+  static const String recordTagIds = 'tagIds';
   static const String recordType = 'type';
   static const String recordTime = 'time';
   static const String recordContent = 'content';
@@ -118,13 +150,12 @@ class RecordManager {
   static const String recordBackgroundColor = 'backgroundColor';
   static const String recordBackgroundImage = 'backgroundImage';
 
-
   Future<List<DiaryRecord>> getAllRecord() async {
     print('-------getAllRecord');
     final db = await TestSqliteHelper.instance.database;
     try {
       // 按时间倒序
-      final result = await db.query(recordTableName);
+      final result = await db.query(recordTableName, orderBy: '$recordTime DESC');
       print('getAllRecord: $result');
       return result.map((json) => DiaryRecord.fromMap(json)).toList();
     } catch (e) {
@@ -133,6 +164,38 @@ class RecordManager {
       return [];
     }
   }
+
+  Future<List<DiaryRecord>> queryRecordByTags(List<int> tagIds) async {
+    final db = await TestSqliteHelper.instance.database;
+    // 查询所有包含tagIds的记录：例如tagIds=[1,2]，则查询tagIds包含1和2的记录 数据库中recordTagIds = '1,2,3'
+    try {
+      final result = await db.query(
+        recordTableName,
+        where: '$recordTagIds LIKE ?',
+        whereArgs: ['%${tagIds.join(',')}%'],
+        orderBy: '$recordTime DESC',
+      );
+      return result.map((json) => DiaryRecord.fromMap(json)).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<List<DiaryRecord>> queryRecordByFolder(int foldId) async {
+    final db = await TestSqliteHelper.instance.database;
+    try {
+      final result = await db.query(
+        recordTableName,
+        where: '$recordFolderId = ?',
+        whereArgs: [foldId],
+        orderBy: '$recordTime DESC',
+      );
+      return result.map((json) => DiaryRecord.fromMap(json)).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
 
   Future<int> updateRecord(DiaryRecord record) async {
     final db = await TestSqliteHelper.instance.database;
@@ -174,4 +237,57 @@ class RecordManager {
       return -1;
     }
   }
+}
+
+class FolderManager {
+  /// [Folder] table fields
+  static const String folderTableName = 'folder';
+  static const String folderId = 'id';
+  static const String folderName = 'name';
+  static const String folderDiaryCount = 'diaryCount';
+  static const String folderBackgroundImage = 'backgroundImage';
+  static const String folderBackgroundColor = 'backgroundColor';
+
+  Future<List<Folder>> getAllFolders() async {
+    final db = await TestSqliteHelper.instance.database;
+    final result = await db.query(folderTableName);
+    return result.map((json) => Folder.fromMap(json)).toList();
+  }
+
+  Future<int> insertFolder(Folder folder) async {
+    try {
+      final db = await TestSqliteHelper.instance.database;
+      final id = await db.insert(folderTableName, folder.toMap());
+      return id;
+    } catch (e) {
+      return -1;
+    }
+  }
+
+  Future<int> deleteFolder(int? id) async {
+    if (id == null) {
+      return -1;
+    }
+    final db = await TestSqliteHelper.instance.database;
+    try {
+      return await db.delete(
+        folderTableName,
+        where: '${FolderManager.folderId} = ?',
+        whereArgs: [id],
+      );
+    } catch (e) {
+      return -1;
+    }
+  }
+
+  Future<int> updateFolder(Folder folder) async {
+    final db = await TestSqliteHelper.instance.database;
+    return db.update(
+      folderTableName,
+      folder.toMap(),
+      where: '${FolderManager.folderId} = ?',
+      whereArgs: [folder.id],
+    );
+  }
+
 }

@@ -7,6 +7,7 @@ import 'package:dribbble/diary/widgets/edit/edit_demo3.dart';
 import 'package:dribbble/diary/widgets/edit/toolbar/template/template_list.dart';
 import 'package:dribbble/diary/widgets/emotion/edit_mood.dart';
 import 'package:dribbble/diary/widgets/emotion/emotion_list.dart';
+import 'package:dribbble/diary/widgets/folder/folders_page.dart';
 import 'package:dribbble/diary/widgets/menu/home.dart';
 import 'package:dribbble/diary/widgets/page_turn.dart';
 import 'package:dribbble/diary/widgets/test_list.dart';
@@ -70,30 +71,30 @@ class ListItem {
 
 class _MyHomePageState extends State<MyHomePage> {
   static List<ListItem> test = [
-    ListItem('Clock1', (context) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const ClockPage1()),
-      );
-    }),
-    ListItem(
-        'testWheel',
-        (context) => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const WheelExamplePage()),
-            )),
-    ListItem(
-        'testListWheel',
-        (context) => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const FixedExtentListPage()),
-            )),
-    ListItem(
-        'test circle list',
-        (context) => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const CircleListPage()),
-            )),
+    // ListItem('Clock1', (context) {
+    //   Navigator.push(
+    //     context,
+    //     MaterialPageRoute(builder: (context) => const ClockPage1()),
+    //   );
+    // }),
+    // ListItem(
+    //     'testWheel',
+    //     (context) => Navigator.push(
+    //           context,
+    //           MaterialPageRoute(builder: (context) => const WheelExamplePage()),
+    //         )),
+    // ListItem(
+    //     'testListWheel',
+    //     (context) => Navigator.push(
+    //           context,
+    //           MaterialPageRoute(builder: (context) => const FixedExtentListPage()),
+    //         )),
+    // ListItem(
+    //     'test circle list',
+    //     (context) => Navigator.push(
+    //           context,
+    //           MaterialPageRoute(builder: (context) => const CircleListPage()),
+    //         )),
     ListItem(
         'test circle loop list',
         (context) => Navigator.push(
@@ -157,6 +158,12 @@ class _MyHomePageState extends State<MyHomePage> {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const TestListPage3()),
+      );
+    }),
+    ListItem('test folder', (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const FoldersPage()),
       );
     }),
   ];

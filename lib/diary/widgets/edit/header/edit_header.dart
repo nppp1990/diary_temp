@@ -130,6 +130,60 @@ class _EditHeader2State extends State<EditHeader2> {
   }
 }
 
+class DiaryTimeSelector extends StatefulWidget {
+  final DateTime time;
+  final ValueChanged<DateTime>? onChanged;
+
+  const DiaryTimeSelector({super.key, required this.time, this.onChanged});
+
+  @override
+  State<StatefulWidget> createState() => _DiaryTimeSelectorState();
+}
+
+class _DiaryTimeSelectorState extends State<DiaryTimeSelector> {
+  late DateTime _date;
+
+  @override
+  void initState() {
+    super.initState();
+    _date = widget.time;
+  }
+
+  @override
+  void didUpdateWidget(covariant DiaryTimeSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.time != oldWidget.time) {
+      _date = widget.time;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _DateSelector(
+          date: _date,
+          onChanged: (date) {
+            // _date和_time得到的_data
+            _date = DateTime(date.year, date.month, date.day, _date.hour, _date.minute);
+            widget.onChanged?.call(_date);
+          },
+        ),
+        const SizedBox(width: 10),
+        _TimeSelector(
+          time: _date,
+          onChanged: (time) {
+            // _date和_time得到的_data
+            _date = DateTime(_date.year, _date.month, _date.day, time.hour, time.minute);
+            widget.onChanged?.call(_date);
+          },
+        ),
+      ],
+    );
+  }
+}
+
 class _DateSelector extends StatefulWidget {
   final DateTime date;
   final ValueChanged<DateTime>? onChanged;
@@ -159,7 +213,9 @@ class _DateSelectorState extends State<_DateSelector> {
       child: Text(
         _formatData(_date),
         style: const TextStyle(
-          fontSize: 18,
+          color: TestColors.primary,
+          fontWeight: FontWeight.w600,
+          fontSize: 20,
         ),
       ),
     );
@@ -216,7 +272,9 @@ class _TimeSelectorState extends State<_TimeSelector> {
       child: Text(
         _formatTime(_time),
         style: const TextStyle(
-          fontSize: 16,
+          color: TestColors.second,
+          fontWeight: FontWeight.w500,
+          fontSize: 18,
         ),
       ),
     );

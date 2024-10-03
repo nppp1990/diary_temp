@@ -92,7 +92,7 @@ class _ToolbarState extends State<Toolbar> {
                           var res = await Navigator.push(
                               context, MaterialPageRoute(builder: (context) => const TemplateListPage()));
                           if (context.mounted && res != null && res is Template) {
-                            ToolBarDialogProvider.of(context).insertTemplate(res.data);
+                            ToolBarDialogProvider.of(context).insertTemplate(res);
                           }
                         })),
                 _buildToolbarButton('assets/icons/ic_background.svg', controller, false, () {

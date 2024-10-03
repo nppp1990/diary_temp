@@ -6,9 +6,17 @@ import 'package:flutter_svg/svg.dart';
 
 class BackgroundSelector extends StatefulWidget {
   final double height;
-  final BackgroundController controller;
+  final BackgroundInfo? backgroundInfo;
+  final ValueChanged<BackgroundInfo?>? onBackgroundChanged;
+  final EdgeInsetsGeometry padding;
 
-  const BackgroundSelector({super.key, this.height = 400, required this.controller});
+  const BackgroundSelector({
+    super.key,
+    this.height = 400,
+    this.padding = const EdgeInsets.all(TestConfiguration.dialogPadding),
+    this.backgroundInfo,
+    required this.onBackgroundChanged,
+  });
 
   @override
   State<StatefulWidget> createState() => _BackgroundSelectorState();
@@ -21,13 +29,15 @@ final List<BackgroundInfo?> _backgroundList = [
   const BackgroundInfo(backgroundColor: Color(0xFFE4F7F6)),
   const BackgroundInfo(backgroundColor: Color(0xFFFDEEFB)),
   const BackgroundInfo(backgroundColor: Color(0xFFD8E6E8)),
-  // const BackgroundInfo(backgroundColor: Color(0xFFD2C6B1)),
   const BackgroundInfo(backgroundColor: Color(0xFFCACFCA)),
   const BackgroundInfo(backgroundColor: Color(0xFFEEFEE4)),
   const BackgroundInfo(backgroundColor: Color(0xFF395C78)),
   const BackgroundInfo(backgroundColor: Color(0xFF4CA477)),
   const BackgroundInfo(assetImage: AssetImage('assets/images/bg_base1.png')),
   const BackgroundInfo(assetImage: AssetImage('assets/images/bg_base2.png')),
+  const BackgroundInfo(assetImage: AssetImage('assets/images/bg_test1.jpg')),
+  const BackgroundInfo(assetImage: AssetImage('assets/images/bg_test2.jpg')),
+  const BackgroundInfo(assetImage: AssetImage('assets/images/bg_test3.jpeg')),
 ];
 
 class _BackgroundSelectorState extends State<BackgroundSelector> {
@@ -36,7 +46,16 @@ class _BackgroundSelectorState extends State<BackgroundSelector> {
   @override
   void initState() {
     super.initState();
-    _selectedBackground = widget.controller.backgroundInfo.value;
+    _selectedBackground = widget.backgroundInfo;
+    // _selectedBackground = widget.controller.backgroundInfo.value;
+  }
+
+  @override
+  void didUpdateWidget(covariant BackgroundSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.backgroundInfo != oldWidget.backgroundInfo) {
+      _selectedBackground = widget.backgroundInfo;
+    }
   }
 
   @override
@@ -46,7 +65,7 @@ class _BackgroundSelectorState extends State<BackgroundSelector> {
         height: widget.height,
         width: double.infinity,
         child: Padding(
-          padding: const EdgeInsets.all(TestConfiguration.dialogPadding),
+          padding: widget.padding,
           child: GridView.builder(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 4,
@@ -103,7 +122,7 @@ class _BackgroundSelectorState extends State<BackgroundSelector> {
                   setState(() {
                     _selectedBackground = info;
                   });
-                  widget.controller.changeBackground(info);
+                  widget.onBackgroundChanged?.call(info);
                 },
                 child: child,
               );

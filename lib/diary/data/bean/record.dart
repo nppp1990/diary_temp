@@ -1,3 +1,4 @@
+import 'package:dribbble/diary/data/bean/folder.dart';
 import 'package:dribbble/diary/data/sqlite_helper.dart';
 import 'package:dribbble/diary/utils/color.dart';
 import 'package:dribbble/diary/utils/time_utils.dart';
@@ -12,6 +13,8 @@ enum RecordType {
 // todo for folder、tag、weather、location
 class DiaryRecord {
   final int? id;
+  final int? folderId;
+  final List<int> tagIds;
   final RecordType type;
   final DateTime time;
   final String? content;
@@ -33,6 +36,8 @@ class DiaryRecord {
 
   DiaryRecord({
     this.id,
+    this.folderId,
+    this.tagIds = const [],
     required this.type,
     required this.time,
     this.content,
@@ -45,6 +50,8 @@ class DiaryRecord {
   Map<String, dynamic> toMap() {
     return {
       RecordManager.recordId: id,
+      RecordManager.recordFolderId: folderId,
+      RecordManager.recordTagIds: tagIds.join(','),
       RecordManager.recordType: type.index,
       RecordManager.recordTime: TimeUtils.getDbTime(time),
       RecordManager.recordContent: content,
@@ -58,6 +65,10 @@ class DiaryRecord {
   factory DiaryRecord.fromMap(Map<String, dynamic> map) {
     return DiaryRecord(
       id: map[RecordManager.recordId],
+      folderId: map[RecordManager.recordFolderId],
+      // todo
+      // tagIds: (map[RecordManager.recordTagIds] as String).split(',').map(int.parse).toList(),
+      tagIds: [],
       type: RecordType.values[map[RecordManager.recordType]],
       time: TimeUtils.parseDbTime(map[RecordManager.recordTime])!,
       content: map[RecordManager.recordContent],
