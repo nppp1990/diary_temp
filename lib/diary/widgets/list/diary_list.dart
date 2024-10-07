@@ -20,6 +20,7 @@ class BaseListView extends StatelessWidget {
         case RecordType.event:
           data.add(
             TestInfo(
+              record: record,
               type: RecordType.event,
               note: record.content,
               time: record.time,
@@ -28,6 +29,7 @@ class BaseListView extends StatelessWidget {
           break;
         case RecordType.mood:
           data.add(TestInfo(
+            record: record,
             type: RecordType.mood,
             moodIndex: record.mood,
             note: record.content,
@@ -37,6 +39,7 @@ class BaseListView extends StatelessWidget {
           break;
         case RecordType.diary:
           data.add(TestInfo(
+            record: record,
             type: RecordType.diary,
             moodIndex: record.mood,
             note: record.diaryPlainText,
@@ -180,6 +183,7 @@ class _TestItem extends StatefulWidget {
 }
 
 class TestInfo {
+  final DiaryRecord record;
   final RecordType type;
   final String? note;
   final int? moodIndex;
@@ -190,6 +194,7 @@ class TestInfo {
   double? itemHeight;
 
   TestInfo({
+    required this.record,
     required this.type,
     this.note,
     this.moodIndex,

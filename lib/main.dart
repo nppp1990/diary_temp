@@ -187,7 +187,10 @@ class _MyHomePageState extends State<MyHomePage> {
     ListItem('test calendar', (context) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const TestCalendarPage()),
+        MaterialPageRoute(
+            builder: (context) => const TestCalendarPage(
+                  recordsMap: {},
+                )),
       );
     }),
   ];

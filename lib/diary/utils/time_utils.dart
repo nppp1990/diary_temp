@@ -11,7 +11,6 @@ abstract class TimeUtils {
   static getDateStr(DateTime date) {
     // 2021-09-01
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-
   }
 
   /// 获取时间字符串 12:00 am
@@ -40,5 +39,13 @@ abstract class TimeUtils {
 extension DateTimeExtension on DateTime {
   TimeOfDay toTimeOfDay() {
     return TimeOfDay(hour: hour, minute: minute);
+  }
+
+  bool isSameDay(DateTime other) {
+    return year == other.year && month == other.month && day == other.day;
+  }
+
+  bool isSameMonth(DateTime other) {
+    return year == other.year && month == other.month;
   }
 }

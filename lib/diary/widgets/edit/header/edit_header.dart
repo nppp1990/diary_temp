@@ -376,7 +376,7 @@ class _EmotionSelectorState extends State<_EmotionSelector> with SingleTickerPro
         haloColor: TestColors.primary.withOpacity(0.2),
         haloSize: 10,
         child: SvgPicture.asset(
-          _index == null ? 'assets/icons/ic_mood_add2.svg' : emotions[_index!],
+          _index == null ? TestConfiguration.moodAddImage : emotions[_index!],
           width: TestConfiguration.editHeaderItemSize,
           height: TestConfiguration.editHeaderItemSize,
           colorFilter: _index == null ? const ColorFilter.mode(TestColors.black1, BlendMode.srcIn) : null,

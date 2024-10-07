@@ -1,3 +1,4 @@
+import 'package:dribbble/diary/data/bean/record.dart';
 import 'package:dribbble/diary/data/sqlite_helper.dart';
 import 'package:dribbble/diary/utils/color.dart';
 import 'package:flutter/material.dart';
@@ -37,3 +38,8 @@ class Folder {
     );
   }
 }
+
+// class FilterFolder extends Folder {
+//   List<RecordType> types;
+//
+// }

@@ -10,6 +10,7 @@ import 'package:dribbble/diary/widgets/folder/folders_page.dart';
 import 'package:dribbble/diary/widgets/list/diary_list.dart';
 import 'package:dribbble/diary/widgets/list/diary_list3.dart';
 import 'package:dribbble/diary/widgets/loading.dart';
+import 'package:dribbble/diary/widgets/test_calendar.dart';
 import 'package:dribbble/diary/widgets/turn/turn_page_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -21,7 +22,9 @@ class FolderPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var bookHeight = MediaQuery.sizeOf(context).height * 0.7;
+    var bookHeight = MediaQuery
+        .sizeOf(context)
+        .height * 0.7;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Test Book'),
@@ -135,16 +138,26 @@ class _DiaryBookState extends State<DiaryBook> {
                         final date = recordMap.keys.elementAt(index - 1);
                         final records = recordMap[date]!;
                         return _BookPageItem(
-                            dateTime: date,
-                            records: records,
-                            data: BaseListView.generateTestListData(records),
-                            index: index,
-                            height: height,
-                            borderRadius: DiaryBook.bookRadius,
-                            padding: EdgeInsets.only(
-                              left: coliWidth - coliPaddingLeft + 10,
-                              right: 10,
-                            ));
+                          dateTime: date,
+                          records: records,
+                          data: BaseListView.generateTestListData(records),
+                          index: index,
+                          height: height,
+                          borderRadius: DiaryBook.bookRadius,
+                          padding: EdgeInsets.only(
+                            left: coliWidth - coliPaddingLeft + 10,
+                            right: 10,
+                          ),
+                          onDateTap: () {
+                            // todo test
+                            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                              return TestCalendarPage(
+                                recordsMap: recordMap,
+                                selectedDay: date,
+                              );
+                            }));
+                          },
+                        );
                       },
                       overleafColorBuilder: (index) => TestColors.grey1,
                       animationTransitionPoint: 0.35,
@@ -167,7 +180,7 @@ class _DiaryBookState extends State<DiaryBook> {
                   children: List.generate(coliCount, (index) {
                     return Padding(
                       padding:
-                          EdgeInsets.only(top: coliHeight * 0.5, bottom: index == coliCount - 1 ? coliHeight * 0.5 : 0),
+                      EdgeInsets.only(top: coliHeight * 0.5, bottom: index == coliCount - 1 ? coliHeight * 0.5 : 0),
                       child: Coil(
                         coilColor: TestColors.black1,
                         width: coliWidth,
@@ -247,6 +260,7 @@ class _BookPageItem extends StatelessWidget {
   final double height;
   final double borderRadius;
   final EdgeInsetsGeometry? padding;
+  final VoidCallback? onDateTap;
 
   const _BookPageItem({
     required this.index,
@@ -256,6 +270,7 @@ class _BookPageItem extends StatelessWidget {
     required this.height,
     required this.borderRadius,
     this.padding,
+    this.onDateTap,
   });
 
   @override
@@ -296,20 +311,24 @@ class _BookPageItem extends StatelessWidget {
                     ),
                   ),
                 const Spacer(),
-                GestureDetector(
-                  onTap: () {
-                    // Navigator.of(context).push(MaterialPageRoute(builder: (context) => FoldersPage()));
-                    // todo 选择时间
-                    print('-----index: $index');
-                  },
-                  child: Text(
-                    '${TimeUtils.getWeekdayStr(dateTime)}, ${TimeUtils.getDateStr(dateTime)}',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: TestColors.black1,
+                SizedBox(
+                  height: 22,
+                  child: TextButton(
+                    onPressed: onDateTap,
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(0),
+                      ),
+                      minimumSize: Size.zero,
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      foregroundColor: TestColors.primary,
+                    ),
+                    child: Text(
+                      '${TimeUtils.getWeekdayStr(dateTime)}, ${TimeUtils.getDateStr(dateTime)}',
+                      style: const TextStyle(fontSize: 14),
                     ),
                   ),
-                ),
+                )
               ],
             ),
           ),

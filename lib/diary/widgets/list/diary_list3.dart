@@ -1,6 +1,7 @@
 import 'package:dribbble/diary/common/test_colors.dart';
 import 'package:dribbble/diary/common/test_configuration.dart';
 import 'package:dribbble/diary/data/bean/record.dart';
+import 'package:dribbble/diary/data/sqlite_helper.dart';
 import 'package:dribbble/diary/utils/docs.dart';
 import 'package:dribbble/diary/utils/time_utils.dart';
 import 'package:dribbble/diary/widgets/list/diary_list.dart';
@@ -191,7 +192,7 @@ class _Item extends StatelessWidget {
         );
       } else {
         return SvgPicture.asset(
-          'assets/icons/ic_mood_add2.svg',
+          TestConfiguration.moodAddImage,
           width: TestListView3.moodSize,
           height: TestListView3.moodSize,
           colorFilter: const ColorFilter.mode(TestColors.grey1, BlendMode.srcIn),
@@ -355,19 +356,25 @@ class _Item extends StatelessWidget {
                               ),
                             ),
                             if (showMore)
-                              Container(
-                                width: 25,
-                                height: 25,
-                                margin: const EdgeInsets.only(left: 10),
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.fromBorderSide(BorderSide(color: TestColors.grey3)),
-                                ),
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.more_horiz_outlined,
-                                    color: TestColors.grey3,
-                                    size: 20,
+                              GestureDetector(
+                                onTap: () {
+                                  // test delete
+                                  RecordManager().deleteRecord(data.record.id!);
+                                },
+                                child: Container(
+                                  width: 25,
+                                  height: 25,
+                                  margin: const EdgeInsets.only(left: 10),
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.fromBorderSide(BorderSide(color: TestColors.grey3)),
+                                  ),
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.more_horiz_outlined,
+                                      color: TestColors.grey3,
+                                      size: 20,
+                                    ),
                                   ),
                                 ),
                               ),

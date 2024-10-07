@@ -71,6 +71,8 @@ abstract final class TestConfiguration {
     'assets/images/emotion_laugh.svg',
   ];
 
+  static const String moodAddImage = 'assets/icons/ic_mood_add.svg';
+
   static const List<String> moodTexts = [
     'Angry',
     'Frustrated',

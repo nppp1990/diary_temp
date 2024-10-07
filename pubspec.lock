@@ -646,10 +646,11 @@ packages:
   table_calendar:
     dependency: "direct main"
     description:
-      name: table_calendar
-      sha256: "4ca32b2fc919452c9974abd4c6ea611a63e33b9e4f0b8c38dba3ac1f4a6549d1"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: "v3.1.2"
+      resolved-ref: ca01aa6265772dfb475fd2923a68aeaec3185200
+      url: "https://github.com/aleksanderwozniak/table_calendar.git"
+    source: git
     version: "3.1.2"
   term_glyph:
     dependency: transitive
