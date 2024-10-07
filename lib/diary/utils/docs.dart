@@ -58,10 +58,10 @@ abstract class DocUtils {
         var attrs = op.attributes;
         if (attrs != null) {
           if (attrs.containsKey(Attribute.unchecked.key)) {
+            if (attrs[Attribute.checked.key] == Attribute.checked.value) {
+              checkedCount++;
+            }
             checkCount++;
-          } else if (attrs.containsKey(Attribute.checked.key)) {
-            checkCount++;
-            checkedCount++;
           }
         }
       }

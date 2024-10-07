@@ -1,73 +1,22 @@
 import 'package:dribbble/diary/common/test_colors.dart';
 import 'package:dribbble/diary/common/test_configuration.dart';
+import 'package:dribbble/diary/data/bean/tag.dart';
 import 'package:dribbble/diary/widgets/bubble.dart';
 import 'package:dribbble/diary/widgets/emphasize.dart';
-import 'package:dribbble/diary/widgets/icon/arrow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class EditHeader1 extends StatelessWidget {
-  const EditHeader1({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: TestConfiguration.editHeaderPadding),
-      child: SizedBox(
-        height: TestConfiguration.editHeaderHeight,
-        child: Row(
-          children: [
-            InkWell(
-              onTap: () {
-                Navigator.of(context).pop();
-              },
-              child: Container(
-                  width: TestConfiguration.editHeaderItemSize,
-                  height: TestConfiguration.editHeaderItemSize,
-                  decoration: BoxDecoration(
-                    color: TestColors.second,
-                    borderRadius: BorderRadius.circular(8),
-                    border: const Border.fromBorderSide(BorderSide(color: TestColors.black1, width: 2)),
-                  ),
-                  child: const Center(
-                    child: LeftArrow(
-                      color: TestColors.black1,
-                      strokeWidth: 2,
-                      size: 16,
-                    ),
-                  )),
-            ),
-            const Spacer(),
-            GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () {
-                Navigator.of(context).pop();
-              },
-              child: SvgPicture.asset(
-                'assets/icons/ic_right.svg',
-                colorFilter: const ColorFilter.mode(TestColors.black1, BlendMode.srcIn),
-                width: 16,
-                height: 16,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class EditHeader2 extends StatefulWidget {
-  final DateTime date;
+  final DateTime time;
+  final ValueChanged<DateTime>? onTimeChanged;
   final int? moodIndex;
-  final ValueChanged<DateTime>? onDateChanged;
   final ValueChanged<int>? onEmotionChanged;
 
   const EditHeader2({
     super.key,
-    required this.date,
+    required this.time,
+    this.onTimeChanged,
     this.moodIndex,
-    this.onDateChanged,
     this.onEmotionChanged,
   });
 
@@ -76,20 +25,14 @@ class EditHeader2 extends StatefulWidget {
 }
 
 class _EditHeader2State extends State<EditHeader2> {
-  late DateTime _date;
-
   @override
   void initState() {
     super.initState();
-    _date = widget.date;
   }
 
   @override
   void didUpdateWidget(covariant EditHeader2 oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.date != oldWidget.date) {
-      _date = widget.date;
-    }
   }
 
   @override
@@ -100,22 +43,9 @@ class _EditHeader2State extends State<EditHeader2> {
         height: TestConfiguration.editHeaderHeight,
         child: Row(
           children: [
-            _DateSelector(
-              date: _date,
-              onChanged: (date) {
-                // _date和_time得到的_data
-                _date = DateTime(date.year, date.month, date.day, _date.hour, _date.minute);
-                widget.onDateChanged?.call(_date);
-              },
-            ),
-            const SizedBox(width: 10),
-            _TimeSelector(
-              time: _date,
-              onChanged: (time) {
-                // _date和_time得到的_data
-                _date = DateTime(_date.year, _date.month, _date.day, time.hour, time.minute);
-                widget.onDateChanged?.call(_date);
-              },
+            DiaryTimeSelector(
+              time: widget.time,
+              onChanged: widget.onTimeChanged,
             ),
             const SizedBox(width: 16),
             const Spacer(),
@@ -127,6 +57,84 @@ class _EditHeader2State extends State<EditHeader2> {
         ),
       ),
     );
+  }
+}
+
+class TagLayout extends StatefulWidget {
+  final List<Tag> tags;
+
+  const TagLayout({super.key, required this.tags});
+
+  @override
+  State<StatefulWidget> createState() => _TagLayoutState();
+}
+
+class _TagLayoutState extends State<TagLayout> {
+  List<Tag> get tags => widget.tags;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(children: [
+      for (var i = 0; i < tags.length; i++)
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              // widget.onTagSelected(tag.name);
+              tags.removeAt(i);
+              setState(() {});
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: TestColors.second,
+                borderRadius: BorderRadius.circular(100),
+              ),
+              child: Text(
+                tags[i].name,
+                style: const TextStyle(
+                  color: TestColors.black1,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        ),
+      Material(
+        color: Colors.transparent,
+        // borderRadius: BorderRadius.circular(100),
+        borderOnForeground: false,
+        child: InkWell(
+          onTap: () {
+            tags.add(Tag(name: 'testXX'));
+            setState(() {});
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(100),
+              border: Border.all(color: TestColors.second),
+            ),
+            child: tags.isEmpty
+                ? const Text(
+                    'Add tag',
+                    style: TextStyle(
+                      color: TestColors.black1,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  )
+                : const Icon(Icons.add, color: TestColors.second, size: 16),
+          ),
+        ),
+      ),
+    ]);
   }
 }
 

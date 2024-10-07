@@ -62,6 +62,8 @@ class TestSqliteHelper {
     await db.execute('''
       CREATE TABLE ${RecordManager.recordTableName} (
         ${RecordManager.recordId} $_idType,
+        ${RecordManager.recordFolderId} $_intType,
+        ${RecordManager.recordTagIds} $_textType,
         ${RecordManager.recordType} $_intTypeNotNull,
         ${RecordManager.recordTime} $_intTypeNotNull,
         ${RecordManager.recordContent} $_textType,
@@ -150,17 +152,32 @@ class RecordManager {
   static const String recordBackgroundColor = 'backgroundColor';
   static const String recordBackgroundImage = 'backgroundImage';
 
-  Future<List<DiaryRecord>> getAllRecord() async {
+  Future<List<DiaryRecord>> getAllRecord({bool timeSortDesc = true}) async {
     print('-------getAllRecord');
     final db = await TestSqliteHelper.instance.database;
     try {
       // 按时间倒序
-      final result = await db.query(recordTableName, orderBy: '$recordTime DESC');
+      final result = await db.query(recordTableName, orderBy: '$recordTime ${timeSortDesc ? 'DESC' : 'ASC'}');
       print('getAllRecord: $result');
       return result.map((json) => DiaryRecord.fromMap(json)).toList();
     } catch (e) {
       print(StackTrace.current.toString());
       print('getAllRecord error: $e');
+      return [];
+    }
+  }
+
+  Future<List<DiaryRecord>> queryRecordsByFolder(int folderId) async {
+    final db = await TestSqliteHelper.instance.database;
+    try {
+      final result = await db.query(
+        recordTableName,
+        where: '$recordFolderId = ?',
+        whereArgs: [folderId],
+        orderBy: '$recordTime DESC',
+      );
+      return result.map((json) => DiaryRecord.fromMap(json)).toList();
+    } catch (e) {
       return [];
     }
   }
@@ -195,7 +212,6 @@ class RecordManager {
       return [];
     }
   }
-
 
   Future<int> updateRecord(DiaryRecord record) async {
     final db = await TestSqliteHelper.instance.database;
@@ -289,5 +305,4 @@ class FolderManager {
       whereArgs: [folder.id],
     );
   }
-
 }

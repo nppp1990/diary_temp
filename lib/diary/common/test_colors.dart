@@ -7,6 +7,8 @@ abstract class TestColors {
 
   static const Color black1 = Color(0xFF2C2C2C);
   static const Color black2 = Color(0xFF4A4A4A);
+  static const Color black3 = Color(0xFF999999);
+
   static const Color toolBarBackground = Color(0xFFF7F7F7);
   static const Color grey1 = Color(0xFFD5D5D5);
   static const Color grey2 = Color(0xFFEFEFEF);

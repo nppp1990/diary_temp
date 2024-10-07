@@ -7,9 +7,9 @@ class Tag {
   final Color? backgroundColor;
 
   Tag({
-    required this.id,
+    this.id,
     required this.name,
-    required this.color,
-    required this.backgroundColor,
+    this.color,
+    this.backgroundColor,
   });
 }

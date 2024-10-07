@@ -114,9 +114,42 @@ class _TestItem3 extends StatelessWidget {
               isTop: i == 0,
               isBottom: i == data.length - 1,
               isOnlyOne: data.length == 1,
+              showMoodText: true,
             ),
         ],
       ),
+    );
+  }
+}
+
+class OneDayItem extends StatelessWidget {
+  final DateTime dateTime;
+  final List<DiaryRecord> records;
+  final List<TestInfo> data;
+
+  const OneDayItem({
+    super.key,
+    required this.dateTime,
+    required this.records,
+    required this.data,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // date header
+        for (int i = 0; i < data.length; i++)
+          _Item(
+            data: data[i],
+            isTop: i == 0,
+            isBottom: i == data.length - 1,
+            isOnlyOne: data.length == 1,
+            maxLines: 5,
+          ),
+        // diary content
+      ],
     );
   }
 }
@@ -128,12 +161,18 @@ class _Item extends StatelessWidget {
   final bool isTop;
   final bool isBottom;
   final bool isOnlyOne;
+  final int maxLines;
+  final bool showMore;
+  final bool showMoodText;
 
   const _Item({
     required this.data,
     this.isTop = false,
     this.isBottom = false,
     this.isOnlyOne = false,
+    this.maxLines = 3,
+    this.showMore = true,
+    this.showMoodText = false,
   });
 
   Widget _buildMood(int? moodIndex, RecordType type) {
@@ -252,7 +291,7 @@ class _Item extends StatelessWidget {
                                     mainAxisSize: MainAxisSize.min,
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      if (data.moodIndex != null) ...[
+                                      if (data.moodIndex != null && showMoodText) ...[
                                         Text(
                                           TestConfiguration.moodTexts[data.moodIndex!],
                                           style: TextStyle(
@@ -298,7 +337,7 @@ class _Item extends StatelessWidget {
                                           ),
                                         )
                                       ],
-                                      if (data.type == RecordType.diary) ...[
+                                      if (data.type == RecordType.diary && data.checkCount != null) ...[
                                         const SizedBox(width: 3),
                                         const Icon(
                                           Icons.check_box_rounded,
@@ -315,28 +354,29 @@ class _Item extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            Container(
-                              width: 25,
-                              height: 25,
-                              margin: const EdgeInsets.only(left: 10),
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.fromBorderSide(BorderSide(color: TestColors.grey3)),
-                              ),
-                              child: const Center(
-                                child: Icon(
-                                  Icons.more_horiz_outlined,
-                                  color: TestColors.grey3,
-                                  size: 20,
+                            if (showMore)
+                              Container(
+                                width: 25,
+                                height: 25,
+                                margin: const EdgeInsets.only(left: 10),
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.fromBorderSide(BorderSide(color: TestColors.grey3)),
+                                ),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.more_horiz_outlined,
+                                    color: TestColors.grey3,
+                                    size: 20,
+                                  ),
                                 ),
                               ),
-                            ),
                           ],
                         ),
                         if (data.note != null)
                           Text(
                             data.note!,
-                            maxLines: 3,
+                            maxLines: maxLines,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               fontSize: TestListView.itemTextSize,

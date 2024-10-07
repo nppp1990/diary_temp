@@ -62,6 +62,7 @@ class _TurnPageViewState extends State<TurnPageView> with TickerProviderStateMix
       itemCount: widget.itemCount,
       thresholdValue: widget.controller.thresholdValue,
       duration: widget.controller.duration,
+      onPageChanged: widget.controller.onPageChanged,
     );
 
     pages = List.generate(
@@ -107,6 +108,13 @@ class _TurnPageViewState extends State<TurnPageView> with TickerProviderStateMix
         );
       },
     );
+
+    // test
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted) {
+        widget.controller.animateToPage(1);
+      }
+    });
   }
 
   @override
@@ -117,7 +125,6 @@ class _TurnPageViewState extends State<TurnPageView> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    print('---build page view');
     final controller = widget.controller;
 
     return LayoutBuilder(
@@ -126,6 +133,7 @@ class _TurnPageViewState extends State<TurnPageView> with TickerProviderStateMix
           if (!widget.useOnTap) {
             return;
           }
+          print('-----onTapUp: $details');
           controller._onTapUp(
             details: details,
             constraints: constraints,
@@ -185,12 +193,15 @@ class TurnPageController extends ChangeNotifier {
 
   final double cornerRadius;
 
+  final ValueChanged<int>? onPageChanged;
+
   TurnPageController({
     this.initialPage = 0,
     this.direction = TurnDirection.rightToLeft,
     this.thresholdValue = _defaultThresholdValue,
     this.duration = defaultTransitionDuration,
     this.cornerRadius = 0,
+    this.onPageChanged,
   }) : assert(0 <= thresholdValue && thresholdValue <= 1);
 
   late TurnAnimationController _animation;
@@ -199,10 +210,13 @@ class TurnPageController extends ChangeNotifier {
 
   int get currentIndex => _animation.currentIndex;
 
+  int get itemCount => _animation.itemCount;
+
   @override
   void dispose() {
-    super.dispose();
+    print('-----TurnPageController dispose');
     _animation.dispose();
+    super.dispose();
   }
 
   /// Moves to the next page in the view.
@@ -328,6 +342,8 @@ class TurnAnimationController {
 
   final List<ValueNotifier<bool>> visibleNotifierList;
 
+  final ValueChanged<int>? onPageChanged;
+
   int currentIndex;
 
   TurnAnimationController({
@@ -337,7 +353,8 @@ class TurnAnimationController {
     required this.thresholdValue,
     required this.duration,
     int preShowPageCount = 2,
-  })  : currentIndex = initialPage,
+    this.onPageChanged,
+  })  : currentIndex = 0,
         _controllers = List.generate(
           itemCount,
           (index) => AnimationController(
@@ -404,6 +421,7 @@ class TurnAnimationController {
     }
     currentPage?.animateTo(_animationMaxValue);
     currentIndex++;
+    onPageChanged?.call(currentIndex);
     // print('-----currentIndex: $currentIndex');
     if (currentIndex + 1 >= itemCount) {
       return;
@@ -417,6 +435,7 @@ class TurnAnimationController {
     }
     previousPage?.animateTo(_animationMinValue);
     currentIndex--;
+    onPageChanged?.call(currentIndex);
     if (currentIndex - 1 < 0) {
       return;
     }
@@ -447,6 +466,7 @@ class TurnAnimationController {
       _controllers[index].animateTo(0.0);
     }
     currentIndex = index;
+    onPageChanged?.call(currentIndex);
     visibleNotifierList[index].value = true;
     if (currentIndex - 1 >= 0) {
       visibleNotifierList[currentIndex - 1].value = true;

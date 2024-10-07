@@ -2,14 +2,17 @@ import 'package:dribbble/clock/clock1/index.dart';
 import 'package:dribbble/clock/clock1/wheel/test_wheel.dart';
 import 'package:dribbble/clock/clock1/wheel/test_list_wheell.dart';
 import 'package:dribbble/diary/button1.dart';
+import 'package:dribbble/diary/data/bean/folder.dart';
 import 'package:dribbble/diary/widgets/edit/edit_demo2.dart';
 import 'package:dribbble/diary/widgets/edit/edit_demo3.dart';
 import 'package:dribbble/diary/widgets/edit/toolbar/template/template_list.dart';
 import 'package:dribbble/diary/widgets/emotion/edit_mood.dart';
 import 'package:dribbble/diary/widgets/emotion/emotion_list.dart';
+import 'package:dribbble/diary/widgets/folder/folder_page.dart';
 import 'package:dribbble/diary/widgets/folder/folders_page.dart';
 import 'package:dribbble/diary/widgets/menu/home.dart';
 import 'package:dribbble/diary/widgets/page_turn.dart';
+import 'package:dribbble/diary/widgets/test_calendar.dart';
 import 'package:dribbble/diary/widgets/test_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -164,6 +167,27 @@ class _MyHomePageState extends State<MyHomePage> {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const FoldersPage()),
+      );
+    }),
+    ListItem('test book', (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FolderPage(
+            folder: Folder(
+              id: 1,
+              name: 'Test Book',
+              diaryCount: 0,
+              backgroundImage: 'assets/images/bg_base1.png',
+            ),
+          ),
+        ),
+      );
+    }),
+    ListItem('test calendar', (context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const TestCalendarPage()),
       );
     }),
   ];

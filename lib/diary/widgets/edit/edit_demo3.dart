@@ -280,12 +280,7 @@ class TestEditState extends State<TestEdit> {
               backgroundColor: Colors.transparent,
               iconTheme: TestConfiguration.toolbarIconStyle,
               forceMaterialTransparency: true,
-              title: DiaryTimeSelector(
-                time: DateTime.now(),
-                onChanged: (time) {
-                  print('----time changed: $time');
-                },
-              ),
+              title: const Text('Edit'),
               actions: [
                 PopupMenuButton(
                   icon: const Icon(Icons.more_vert),
@@ -315,7 +310,7 @@ class TestEditState extends State<TestEdit> {
                   icon: const Icon(Icons.check),
                   onPressed: () {
                     _saveDoc();
-                    // Navigator.pop(context);
+                    Navigator.pop(context);
                   },
                 ),
               ],
@@ -325,13 +320,11 @@ class TestEditState extends State<TestEdit> {
                 Column(
                   children: [
                     EditHeader2(
-                      date: DateTime.now(),
-                      moodIndex: _moodIndex,
-                      onDateChanged: (date) {
-                        // year, month, day hh:mm
-                        print('----date: $date');
-                        _time = date;
+                      time: _time,
+                      onTimeChanged: (time) {
+                        _time = time;
                       },
+                      moodIndex: _moodIndex,
                       onEmotionChanged: (index) {
                         print('----emotion: $index');
                         _moodIndex = index;

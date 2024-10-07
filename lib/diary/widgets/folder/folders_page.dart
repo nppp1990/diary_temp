@@ -26,7 +26,6 @@ class FoldersPage extends StatelessWidget {
         title: const Text('Test Folders'),
       ),
       // get list and default id
-      // 返回两个字段的类型：
       body: FutureLoading<Map, Map>(
         convert: (res) => res,
         futureBuilder: () async {
@@ -162,7 +161,7 @@ class _FolderListState extends State<_FolderList> {
           right: TestConfiguration.pagePadding,
         ),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+          crossAxisCount: 3,
           crossAxisSpacing: 15,
           mainAxisSpacing: 15,
           childAspectRatio: 0.65,
@@ -239,20 +238,22 @@ class _FolderListState extends State<_FolderList> {
     return AnimationConfiguration.staggeredGrid(
       position: index,
       duration: const Duration(milliseconds: 500),
-      columnCount: 2,
+      columnCount: 3,
       child: SlideAnimation(
         verticalOffset: 150.0,
         child: ScaleTransition(
           scale: animation,
           child: FadeInAnimation(
-            child: _GridItemContainer(
-                index: index,
-                folder: folder,
-                isDefault: folder?.id == _defaultFolderId,
-                onItemTap: () => _onItemClick(index, folder),
-                onMoreTap: (context) {
-                  _showContextMenu(context, index, index % 2 == 0);
-                }),
+            child: BookCover(
+              folder: folder,
+              isDefault: folder?.id == _defaultFolderId,
+              onItemTap: () => _onItemClick(index, folder),
+              onMoreTap: (context) {
+                _showContextMenu(context, index, index % 3 == 0);
+              },
+              borderRadius: 12,
+              isSmall: true,
+            ),
           ),
         ),
       ),
@@ -262,34 +263,37 @@ class _FolderListState extends State<_FolderList> {
 
 typedef MoreTapCallback = void Function(BuildContext context);
 
-class _GridItemContainer extends StatelessWidget {
-  final int index;
+class BookCover extends StatelessWidget {
   final Folder? folder;
   final GestureTapCallback? onItemTap;
   final MoreTapCallback? onMoreTap;
   final bool isDefault;
+  final double borderRadius;
+  final bool isSmall;
 
-  const _GridItemContainer({
-    required this.index,
+  const BookCover({
+    super.key,
     this.folder,
     this.onItemTap,
     this.onMoreTap,
     this.isDefault = false,
+    this.borderRadius = 16,
+    this.isSmall = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: folder?.backgroundColor ?? Colors.white,
-      borderRadius: const BorderRadius.only(
-        topRight: Radius.circular(16),
-        bottomRight: Radius.circular(16),
+      borderRadius: BorderRadius.only(
+        topRight: Radius.circular(borderRadius),
+        bottomRight: Radius.circular(borderRadius),
       ),
       child: InkWell(
         onTap: onItemTap,
-        borderRadius: const BorderRadius.only(
-          topRight: Radius.circular(16),
-          bottomRight: Radius.circular(16),
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(borderRadius),
+          bottomRight: Radius.circular(borderRadius),
         ),
         child: Container(
           decoration: BoxDecoration(
@@ -299,13 +303,13 @@ class _GridItemContainer extends StatelessWidget {
                     fit: BoxFit.cover,
                   )
                 : null,
-            borderRadius: const BorderRadius.only(
-              topRight: Radius.circular(16),
-              bottomRight: Radius.circular(16),
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(borderRadius),
+              bottomRight: Radius.circular(borderRadius),
             ),
             border: Border.all(color: TestColors.black1, width: 2),
           ),
-          child: folder == null ? _buildAddItem() : _buildItem(folder!, onMoreTap),
+          child: folder == null ? _buildAddItem() : _buildItem(folder!, onMoreTap, isSmall, borderRadius),
         ),
       ),
     );
@@ -331,32 +335,34 @@ class _GridItemContainer extends StatelessWidget {
     );
   }
 
-  Widget _buildItem(Folder folder, MoreTapCallback? onMoreTap) {
+  Widget _buildItem(Folder folder, MoreTapCallback? onMoreTap, bool isSmall, double countRadius) {
     return Stack(
       children: [
-        Align(
-          alignment: Alignment.topRight,
-          child: SizedBox(
-            width: 36,
-            height: 36,
-            child: Builder(builder: (context) {
-              return IconButton(
-                padding: EdgeInsets.zero,
-                onPressed: () => onMoreTap?.call(context),
-                icon: const Icon(
-                  Icons.more_vert_outlined,
-                  color: TestColors.black1,
-                ),
-              );
-            }),
+        if (onMoreTap != null)
+          Align(
+            alignment: Alignment.topRight,
+            child: SizedBox(
+              width: isSmall ? 30 : 36,
+              height: isSmall ? 30 : 36,
+              child: Builder(builder: (context) {
+                return IconButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () => onMoreTap.call(context),
+                  icon: Icon(
+                    Icons.more_vert_outlined,
+                    color: TestColors.black1,
+                    size: isSmall ? 20 : 24,
+                  ),
+                );
+              }),
+            ),
           ),
-        ),
         Align(
           alignment: Alignment.center,
           child: Text(
             folder.name,
-            style: const TextStyle(
-              fontSize: 20,
+            style: TextStyle(
+              fontSize: isSmall ? 16 : 20,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -364,17 +370,17 @@ class _GridItemContainer extends StatelessWidget {
         Align(
           alignment: Alignment.bottomRight,
           child: Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(isSmall ? 8 : 12),
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.2),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                bottomRight: Radius.circular(16),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(countRadius),
+                bottomRight: Radius.circular(countRadius),
               ),
             ),
             child: Text(
               '${folder.diaryCount}',
-              style: const TextStyle(color: Colors.white, height: 1),
+              style: TextStyle(color: Colors.white, height: 1, fontSize: isSmall ? 12 : null),
             ),
           ),
         ),
