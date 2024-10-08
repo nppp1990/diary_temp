@@ -1,5 +1,3 @@
-import 'package:dribbble/clock/clock1/index.dart';
-import 'package:dribbble/clock/clock1/wheel/test_wheel.dart';
 import 'package:dribbble/clock/clock1/wheel/test_list_wheell.dart';
 import 'package:dribbble/diary/button1.dart';
 import 'package:dribbble/diary/data/bean/folder.dart';
@@ -12,13 +10,13 @@ import 'package:dribbble/diary/widgets/folder/folder_page.dart';
 import 'package:dribbble/diary/widgets/folder/folders_page.dart';
 import 'package:dribbble/diary/widgets/menu/home.dart';
 import 'package:dribbble/diary/widgets/page_turn.dart';
-import 'package:dribbble/diary/widgets/test_calendar.dart';
 import 'package:dribbble/diary/widgets/test_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'clock/clock2/index.dart';
 import 'diary/common/test_colors.dart';
+import 'diary/widgets/calendar/test_calendar.dart';
 import 'diary/widgets/test_paint.dart';
 
 void main() {
@@ -187,10 +185,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ListItem('test calendar', (context) {
       Navigator.push(
         context,
-        MaterialPageRoute(
-            builder: (context) => const TestCalendarPage(
-                  recordsMap: {},
-                )),
+        MaterialPageRoute(builder: (context) => const TestCalendarPage(recordsMap: {})),
       );
     }),
   ];

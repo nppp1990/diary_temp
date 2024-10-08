@@ -3,14 +3,15 @@ import 'package:dribbble/diary/common/test_configuration.dart';
 import 'package:dribbble/diary/data/bean/folder.dart';
 import 'package:dribbble/diary/data/bean/record.dart';
 import 'package:dribbble/diary/data/sqlite_helper.dart';
+import 'package:dribbble/diary/utils/dialog_utils.dart';
 import 'package:dribbble/diary/utils/docs.dart';
 import 'package:dribbble/diary/utils/time_utils.dart';
+import 'package:dribbble/diary/widgets/calendar/calendar_dialog.dart';
 import 'package:dribbble/diary/widgets/coli.dart';
 import 'package:dribbble/diary/widgets/folder/folders_page.dart';
 import 'package:dribbble/diary/widgets/list/diary_list.dart';
 import 'package:dribbble/diary/widgets/list/diary_list3.dart';
 import 'package:dribbble/diary/widgets/loading.dart';
-import 'package:dribbble/diary/widgets/test_calendar.dart';
 import 'package:dribbble/diary/widgets/turn/turn_page_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -22,9 +23,7 @@ class FolderPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var bookHeight = MediaQuery
-        .sizeOf(context)
-        .height * 0.7;
+    var bookHeight = MediaQuery.sizeOf(context).height * 0.7;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Test Book'),
@@ -91,6 +90,26 @@ class _DiaryBookState extends State<DiaryBook> {
     super.dispose();
   }
 
+  void _onClickDate(BuildContext context, final Map<DateKey, List<DiaryRecord>> recordsMap, final DateKey date) async {
+    var time = await DiaryCalendarDialog.show(context, recordsMap: recordsMap, selectedDay: date.toDateTime());
+    if (time != null && time is DateTime) {
+      print('selected time: $time');
+      DateKey key = DateKey.fromDateTime(time);
+      int index = recordsMap.keys.toList().indexOf(key);
+      if (!context.mounted) {
+        return;
+      }
+      if (index == -1) {
+        DialogUtils.showToast(context, 'No record on ${time.toDateString()}');
+      } else {
+        int currentIndex = _pageController.currentIndex;
+        if (index + 1 != currentIndex) {
+          _pageController.animateToPage(index + 1);
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double coliWidth = coliPaddingLeft * 386 / 148;
@@ -103,12 +122,12 @@ class _DiaryBookState extends State<DiaryBook> {
           height: height,
           child: Stack(
             children: [
-              FutureLoading<List<DiaryRecord>, Map<DateTime, List<DiaryRecord>>>(
+              FutureLoading<List<DiaryRecord>, Map<DateKey, List<DiaryRecord>>>(
                 futureBuilder: () async {
                   await Future.delayed(const Duration(seconds: 1));
                   return RecordManager().getAllRecord(timeSortDesc: false);
                 },
-                convert: DocUtils.groupRecordsByDate,
+                convert: DocUtils.groupRecordsByDate2,
                 contentBuilder: (context, recordMap) {
                   return Padding(
                     padding: EdgeInsets.only(left: coliPaddingLeft),
@@ -138,7 +157,7 @@ class _DiaryBookState extends State<DiaryBook> {
                         final date = recordMap.keys.elementAt(index - 1);
                         final records = recordMap[date]!;
                         return _BookPageItem(
-                          dateTime: date,
+                          dateTime: date.toDateTime(),
                           records: records,
                           data: BaseListView.generateTestListData(records),
                           index: index,
@@ -148,15 +167,7 @@ class _DiaryBookState extends State<DiaryBook> {
                             left: coliWidth - coliPaddingLeft + 10,
                             right: 10,
                           ),
-                          onDateTap: () {
-                            // todo test
-                            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                              return TestCalendarPage(
-                                recordsMap: recordMap,
-                                selectedDay: date,
-                              );
-                            }));
-                          },
+                          onDateTap: () => _onClickDate(context, recordMap, date),
                         );
                       },
                       overleafColorBuilder: (index) => TestColors.grey1,
@@ -180,7 +191,7 @@ class _DiaryBookState extends State<DiaryBook> {
                   children: List.generate(coliCount, (index) {
                     return Padding(
                       padding:
-                      EdgeInsets.only(top: coliHeight * 0.5, bottom: index == coliCount - 1 ? coliHeight * 0.5 : 0),
+                          EdgeInsets.only(top: coliHeight * 0.5, bottom: index == coliCount - 1 ? coliHeight * 0.5 : 0),
                       child: Coil(
                         coilColor: TestColors.black1,
                         width: coliWidth,

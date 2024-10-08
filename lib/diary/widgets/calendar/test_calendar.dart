@@ -8,7 +8,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class TestCalendarPage extends StatelessWidget {
-  final Map<DateTime, List<DiaryRecord>> recordsMap;
+  final Map<DateKey, List<DiaryRecord>> recordsMap;
   final DateTime? selectedDay;
 
   const TestCalendarPage({super.key, required this.recordsMap, this.selectedDay});
@@ -21,7 +21,7 @@ class TestCalendarPage extends StatelessWidget {
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(38.0),
+          padding: const EdgeInsets.all(0),
           child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -49,22 +49,23 @@ class TestCalendarPage extends StatelessWidget {
 }
 
 class DiaryCalendarInfo {
-  final DateTime date;
+  // final DateTime date;
   final int? mood;
   final List<DiaryRecord>? records;
 
   DiaryCalendarInfo({
-    required this.date,
+    // required this.date,
     this.mood,
     required this.records,
   });
 }
 
 class DiaryCalendar extends StatefulWidget {
-  final Map<DateTime, List<DiaryRecord>> recordsMap;
+  final Map<DateKey, List<DiaryRecord>> recordsMap;
   final DateTime? selectedDay;
+  final ValueChanged<DateTime>? onDayChanged;
 
-  const DiaryCalendar({super.key, required this.recordsMap, this.selectedDay});
+  const DiaryCalendar({super.key, required this.recordsMap, this.selectedDay, this.onDayChanged});
 
   @override
   State<StatefulWidget> createState() => _DiaryCalendarState();
@@ -80,9 +81,9 @@ class _DiaryCalendarState extends State<DiaryCalendar> {
   void initState() {
     super.initState();
     widget.recordsMap.forEach((key, value) {
-      final dateKey = DateKey.fromDateTime(key);
+      // final dateKey = DateKey.fromDateTime(key);
       int? mood = DocUtils.getDayMood(value);
-      testMap[dateKey] = DiaryCalendarInfo(date: key, records: value, mood: mood);
+      testMap[key] = DiaryCalendarInfo(records: value, mood: mood);
     });
     _focusedDay = widget.selectedDay ?? DateTime.now();
     _selectedDay = _focusedDay;
@@ -147,12 +148,14 @@ class _DiaryCalendarState extends State<DiaryCalendar> {
         richMessage: TextSpan(
           children: [
             TextSpan(
-              text: '${date.day.toString()} ${diaryCalendarInfo.mood == null ? '' : ':'}',
-              style: TextStyle(color: tipColor),
+              // 9.10 Mood:frustrated
+              text: '${date.month.toString()}.${date.day.toString()}',
+              // text: '${date.day.toString()} ${diaryCalendarInfo.mood == null ? '' : ':'}',
+              style: const TextStyle(color: TestColors.black1),
             ),
             if (diaryCalendarInfo.mood != null)
               TextSpan(
-                text: TestConfiguration.moodTexts[diaryCalendarInfo.mood!],
+                text: '  Mood:${TestConfiguration.moodTexts[diaryCalendarInfo.mood!]}',
                 style: TextStyle(color: tipColor),
               ),
           ],
@@ -189,15 +192,18 @@ class _DiaryCalendarState extends State<DiaryCalendar> {
       lastDay: DateTime.utc(2030, 3, 14),
       focusedDay: _focusedDay,
       onPageChanged: (focusedDay) {
-        print('--------onPageChanged: $focusedDay');
         _focusedDay = focusedDay;
       },
       headerStyle: HeaderStyle(
+        headerPadding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
         formatButtonVisible: false,
-        // titleCentered: true,
         titleTextStyle: const TextStyle(color: TestColors.black1, fontSize: 16),
-        leftChevronMargin: const EdgeInsets.symmetric(horizontal: 2),
-        rightChevronMargin: const EdgeInsets.symmetric(horizontal: 2),
+        leftChevronMargin: const EdgeInsets.all(0),
+        rightChevronMargin: const EdgeInsets.all(0),
+        leftChevronPadding: const EdgeInsets.all(8),
+        rightChevronPadding: const EdgeInsets.all(8),
+        leftChevronIcon: const Icon(Icons.chevron_left, color: TestColors.black1, size: 30),
+        rightChevronIcon: const Icon(Icons.chevron_right, color: TestColors.black1, size: 30),
         todayIndicatorBuilder: (context) {
           DateTime today = DateTime.now();
           if (today.isSameDay(_selectedDay) && today.isSameMonth(_focusedDay)) {
@@ -220,18 +226,13 @@ class _DiaryCalendarState extends State<DiaryCalendar> {
         },
       ),
       calendarFormat: _calendarFormat,
-      // onFormatChanged: (format) {
-      //   print('format: $format');
-      //   setState(() {
-      //     _calendarFormat = format;
-      //   });
-      // },
       onDaySelected: (selectedDay, focusedDay) {
         if (!isSameDay(_selectedDay, selectedDay)) {
           setState(() {
             _selectedDay = selectedDay;
             _focusedDay = focusedDay;
           });
+          widget.onDayChanged?.call(selectedDay);
         }
       },
       calendarBuilders: CalendarBuilders(
@@ -277,34 +278,4 @@ class TodayIndicator extends StatelessWidget {
       ),
     );
   }
-}
-
-class DateKey {
-  final int year;
-  final int month;
-  final int day;
-
-  DateKey({
-    required this.year,
-    required this.month,
-    required this.day,
-  });
-
-  factory DateKey.fromDateTime(DateTime dateTime) {
-    return DateKey(year: dateTime.year, month: dateTime.month, day: dateTime.day);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (other is DateKey) {
-      return year == other.year && month == other.month && day == other.day;
-    }
-    return false;
-  }
-
-  @override
-  int get hashCode => year.hashCode ^ month.hashCode ^ day.hashCode;
 }

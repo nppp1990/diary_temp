@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:convert';
 
 import 'package:dribbble/diary/data/bean/record.dart';
+import 'package:dribbble/diary/utils/time_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
@@ -119,6 +120,33 @@ abstract class DocUtils {
     });
     // map 按照time从大到小排序
     return SplayTreeMap<DateTime, List<DiaryRecord>>.from(map, (a, b) => b.compareTo(a));
+  }
+
+  static Map<DateKey, List<DiaryRecord>>? groupRecordsByDate2(List<DiaryRecord>? records) {
+    if (records == null) {
+      return {};
+    }
+    Map<DateKey, List<DiaryRecord>> map = {};
+    for (var record in records) {
+      DateKey dateKey = DateKey.fromDateTime(record.time);
+      if (record.type == RecordType.diary && record.diaryPlainText == null) {
+        var info = parseDocInfo(record.content!);
+        record.diaryPlainText = info['allText'];
+        record.checkCount = info['checkCount'];
+        record.checkedCount = info['checkedCount'];
+      }
+      if (map.containsKey(dateKey)) {
+        map[dateKey]!.add(record);
+      } else {
+        map[dateKey] = [record];
+      }
+    }
+    // List<DiaryRecord> 按照time从大到小排序
+    map.forEach((key, value) {
+      value.sort((a, b) => b.time.compareTo(a.time));
+    });
+    // map 按照time从大到小排序
+    return SplayTreeMap<DateKey, List<DiaryRecord>>.from(map, (a, b) => a.compareTo(b));
   }
 
   static int? getDayMood(List<DiaryRecord> records) {
