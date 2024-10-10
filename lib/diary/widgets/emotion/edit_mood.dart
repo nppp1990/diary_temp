@@ -3,10 +3,233 @@ import 'package:dribbble/diary/common/test_configuration.dart';
 import 'package:dribbble/diary/data/bean/record.dart';
 import 'package:dribbble/diary/data/sqlite_helper.dart';
 import 'package:dribbble/diary/utils/dialog_utils.dart';
+import 'package:dribbble/diary/utils/time_utils.dart';
 import 'package:dribbble/diary/widgets/bubble.dart';
+import 'package:dribbble/diary/widgets/card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pageviewj/pageviewj.dart';
+
+import '../simple/event_dialog.dart';
+
+class MoodDialog extends StatefulWidget {
+  final DiaryRecord? record;
+
+  const MoodDialog({super.key, this.record});
+
+  @override
+  State<StatefulWidget> createState() => _MoodDialogState();
+
+  static showMoodDialog(BuildContext context, {DiaryRecord? record}) {
+    return showDialog(
+      context: context,
+      builder: (context) => MoodDialog(
+        record: record,
+      ),
+    );
+  }
+}
+
+class _MoodDialogState extends State<MoodDialog> {
+  late int _moodIndex;
+  late TimeOfDay _time;
+  late ValueNotifier<bool> _isOneDayMood;
+  late String? _note;
+
+  @override
+  void initState() {
+    super.initState();
+    _moodIndex = widget.record?.mood ?? 4;
+    _time = widget.record?.time.toTimeOfDay() ?? TimeOfDay.now();
+    _isOneDayMood = ValueNotifier(widget.record?.moodForAllDay ?? false);
+    _note = widget.record?.content;
+  }
+
+  @override
+  void dispose() {
+    _isOneDayMood.dispose();
+    super.dispose();
+  }
+
+  bool _hasChanged() {
+    bool oldIsOneDayMood = widget.record?.moodForAllDay ?? false;
+    return _moodIndex != widget.record?.mood ||
+        _note != widget.record?.content ||
+        _isOneDayMood.value != oldIsOneDayMood ||
+        _time != widget.record?.time.toTimeOfDay();
+  }
+
+  _save() async {
+    print('save: $_moodIndex, ${_isOneDayMood.value}, ${_time.toString()}, note: $_note');
+    DateTime time = widget.record?.time ?? DateTime.now();
+    DiaryRecord record = DiaryRecord(
+      id: widget.record?.id,
+      type: RecordType.mood,
+      mood: _moodIndex,
+      moodForAllDay: _isOneDayMood.value,
+      content: _note,
+      time: time.copyWith(hour: _time.hour, minute: _time.minute),
+    );
+    if (_hasChanged()) {
+      if (record.id == null) {
+        var res = await RecordManager().insertRecord(record);
+        if (res > 0 && mounted) {
+          record = record.copyWith(id: res);
+          Navigator.pop(context, record);
+        }
+      } else {
+        RecordManager().updateRecord(record);
+        Navigator.pop(context, record);
+      }
+    } else {
+      Navigator.pop(context);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width - TestConfiguration.pagePadding * 2;
+    return AlertDialog(
+        backgroundColor: Colors.transparent,
+        contentPadding: EdgeInsets.zero,
+        insetPadding: EdgeInsets.zero,
+        content: OffsetCard(
+          offset: const Offset(6, 6),
+          decoration: BoxDecoration(
+            color: TestColors.third,
+            border: Border.all(color: TestColors.black1, width: 2),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            width: width,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: TestColors.black1, width: 2),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: TestConfiguration.dialogPadding),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: TestConfiguration.pagePadding),
+                      child: Text(
+                        widget.record == null ? 'Add Mood' : 'Edit Mood',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: TestColors.black1,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ValueListenableBuilder(
+                      valueListenable: _isOneDayMood,
+                      builder: (context, value, child) {
+                        return Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            'How are you feeling ${value ? 'today' : 'now'}?',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              height: 1,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    MoodPageView(
+                      width: width,
+                      moodIndex: _moodIndex,
+                      onChanged: (index) {
+                        _moodIndex = index;
+                      },
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: TestConfiguration.pagePadding),
+                      child: TextFormField(
+                        initialValue: widget.record?.content,
+                        maxLength: 20,
+                        maxLines: null,
+                        decoration: const InputDecoration(
+                          hintText: 'Add a note',
+                          hintStyle: TextStyle(color: TestColors.grey1),
+                        ),
+                        onChanged: (value) {
+                          _note = value;
+                        },
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        const Text('Is this one day mood?', style: TextStyle(fontSize: 14)),
+                        const SizedBox(width: 8),
+                        ValueListenableBuilder(
+                          valueListenable: _isOneDayMood,
+                          builder: (context, value, child) {
+                            return Transform.scale(
+                              scale: 0.8,
+                              child: Switch(
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                inactiveThumbColor: TestColors.primary,
+                                trackOutlineColor: WidgetStateProperty.all(TestColors.primary),
+                                activeTrackColor: TestColors.primary,
+                                value: value,
+                                onChanged: (value) {
+                                  _isOneDayMood.value = value;
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 4),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        const SizedBox(width: TestConfiguration.pagePadding),
+                        DateLayout(date: widget.record?.time ?? DateTime.now()),
+                        const SizedBox(width: 8),
+                        TimeLayout(
+                          time: _time,
+                          onChanged: (time) {
+                            _time = time;
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        const Spacer(),
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            minimumSize: Size.zero,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                            foregroundColor: TestColors.primary,
+                          ),
+                          onPressed: _save,
+                          child: const Text(
+                            'Save',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: TestConfiguration.pagePadding - 16),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ));
+  }
+}
 
 class EditMoodPage extends StatefulWidget {
   // final int? moodIndex;
@@ -175,6 +398,7 @@ class _EditMoodPageContentState extends State<EditMoodPageContent> {
           ),
           const SizedBox(height: 20),
           MoodPageView(
+            width: MediaQuery.sizeOf(context).width,
             moodIndex: _moodIndex,
             onChanged: (index) {
               _moodIndex = index;
@@ -234,10 +458,11 @@ class _EditMoodPageContentState extends State<EditMoodPageContent> {
 }
 
 class MoodPageView extends StatefulWidget {
+  final double width;
   final int? moodIndex;
   final ValueChanged<int>? onChanged;
 
-  const MoodPageView({super.key, this.moodIndex, this.onChanged});
+  const MoodPageView({super.key, this.moodIndex, this.onChanged, required this.width});
 
   @override
   State<StatefulWidget> createState() => _MoodPageViewState();
@@ -293,10 +518,15 @@ class _MoodPageViewState extends State<MoodPageView> {
       children: [
         Opacity(
           opacity: 0.5 + 0.5 * aniValue,
-          child: SvgPicture.asset(
-            moods[index],
-            width: width * 0.7 + width * 0.3 * aniValue,
-            height: width * 0.7 + width * 0.3 * aniValue,
+          child: GestureDetector(
+            onTap: () {
+              _controller.animateToPage(index, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+            },
+            child: SvgPicture.asset(
+              moods[index],
+              width: width * 0.7 + width * 0.3 * aniValue,
+              height: width * 0.7 + width * 0.3 * aniValue,
+            ),
           ),
         ),
         const SizedBox(height: 6),
@@ -307,9 +537,8 @@ class _MoodPageViewState extends State<MoodPageView> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
     return SizedBox(
-      height: screenWidth * _controller.viewportFraction + 80,
+      height: widget.width * _controller.viewportFraction + 50,
       child: PageViewJ.aniBuilder(
         onPageChanged: (index) {
           widget.onChanged?.call(index);
@@ -317,7 +546,7 @@ class _MoodPageViewState extends State<MoodPageView> {
         controller: _controller,
         itemCount: moods.length,
         aniItemBuilder: (context, index, page, aniValue) {
-          return _buildIMoodItem(context, index, page, aniValue, screenWidth * _controller.viewportFraction);
+          return _buildIMoodItem(context, index, page, aniValue, widget.width * _controller.viewportFraction);
         },
       ),
     );

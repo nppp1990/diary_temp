@@ -69,42 +69,50 @@ class ContentDialog extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    InkWell(
-                      onTap: onCancel ?? () => Navigator.of(context).pop(-1),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: TestColors.grey1, width: 1),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                          child: Text(
-                            cancelText ?? 'Cancel',
-                            style: const TextStyle(
-                              color: TestColors.primary,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
+                    Material(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      child: InkWell(
+                        onTap: onCancel ?? () => Navigator.of(context).pop(-1),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: TestColors.grey1, width: 1),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                            child: Text(
+                              cancelText ?? 'Cancel',
+                              style: const TextStyle(
+                                color: TestColors.primary,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
                     const SizedBox(width: 16),
-                    InkWell(
-                      onTap: onConfirm ?? () => Navigator.of(context).pop(1),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: TestColors.second,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: TestColors.black1, width: 1),
-                        ),
-                        child: Text(
-                          confirmText ?? 'Confirm',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
+                    Material(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      color: TestColors.second,
+                      child: InkWell(
+                        onTap: onConfirm ?? () => Navigator.of(context).pop(1),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: TestColors.black1, width: 1),
+                          ),
+                          child: Text(
+                            confirmText ?? 'Confirm',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                       ),
@@ -165,12 +173,132 @@ abstract class DialogUtils {
       content: content != null
           ? Padding(
               padding: const EdgeInsets.symmetric(horizontal: TestConfiguration.dialogPadding),
-              child: Expanded(
-                child: Text(content, style: const TextStyle(fontSize: 16)),
-              ))
+              child: Text(content, style: const TextStyle(fontSize: 16)))
           : null,
       confirmText: confirmText,
       cancelText: cancelText,
+    );
+  }
+
+  static OverlayEntry getContextMenuOverlay(
+    BuildContext context, {
+    required int itemCount,
+    required Widget Function(BuildContext context, int i) itemBuilder,
+    required double menuHeight,
+    required double menuWidth,
+    required GestureTapCallback hideContextMenu,
+    double gap = 10,
+    Offset? position,
+  }) {
+    double top;
+    double left;
+    bool isFromTop;
+    bool isFromLeft;
+    final renderBox = context.findRenderObject() as RenderBox;
+    final Offset offset = renderBox.localToGlobal(Offset.zero);
+    if (position != null) {
+      isFromTop = position.dy + menuHeight + gap < MediaQuery.of(context).size.height;
+      isFromLeft = position.dx + menuWidth + gap < MediaQuery.of(context).size.width;
+      top = isFromTop ? position.dy : position.dy - menuHeight;
+      left = isFromLeft ? position.dx : position.dx - menuWidth;
+    } else {
+      isFromTop = offset.dy + renderBox.size.height + menuHeight + gap < MediaQuery.of(context).size.height;
+      isFromLeft = offset.dx + renderBox.size.width / 2 + menuWidth + gap < MediaQuery.of(context).size.width;
+
+      top = isFromTop ? offset.dy + renderBox.size.height - 10 : offset.dy - menuHeight + gap;
+      left = offset.dx + (isFromLeft ? renderBox.size.width / 2 : -menuWidth + renderBox.size.width / 2);
+    }
+
+    print('----show menu top: $top, left: $left');
+
+    return OverlayEntry(builder: (context) {
+      return Stack(
+        children: [
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: hideContextMenu,
+            ),
+          ),
+          Positioned(
+            top: top,
+            left: left,
+            // menu动画：从左到右、从上到下
+            child: _MenuAnimation(
+              isFromTop: isFromTop,
+              child: Material(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                elevation: 4,
+                child: SizedBox(
+                  width: menuWidth,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (int i = 0; i < itemCount; i++) itemBuilder.call(context, i),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    });
+  }
+}
+
+class _MenuAnimation extends StatefulWidget {
+  final Duration duration = const Duration(milliseconds: 200);
+  final Widget child;
+  final bool isFromTop;
+
+  const _MenuAnimation({
+    this.isFromTop = true,
+    required this.child,
+  });
+
+  @override
+  State<StatefulWidget> createState() => _MenuAnimationState();
+}
+
+class _MenuAnimationState extends State<_MenuAnimation> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: widget.duration);
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: Offset(0, widget.isFromTop ? -0.1 : 0.1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: widget.child,
+      ),
     );
   }
 }

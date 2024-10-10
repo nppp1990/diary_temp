@@ -34,23 +34,38 @@ class HomePage extends StatelessWidget {
       body: const Center(
         child: Text('Home Page'),
       ),
-      floatingActionButton: const _ItemsActionButton(),
+      floatingActionButton: ItemsActionButton(
+        onItemTap: (index) => _onItemTap(context, index),
+      ),
       // floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
       // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       //
     );
   }
+
+  void _onItemTap(BuildContext context, int index) {
+    if (index == 0) {
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const TestEditDemo3()));
+    } else if (index == 1) {
+      MoodDialog.showMoodDialog(context);
+      // Navigator.of(context).push(MaterialPageRoute(builder: (context) => const EditMoodPage()));
+    } else if (index == 2) {
+      SimpleEventDialog.showEventDialog(context);
+    }
+  }
 }
 
-class _ItemsActionButton extends StatefulWidget {
-  const _ItemsActionButton();
+class ItemsActionButton extends StatefulWidget {
+  final Function(int index) onItemTap;
+
+  const ItemsActionButton({super.key, required this.onItemTap});
 
   @override
   State<StatefulWidget> createState() => _ItemsActionButtonState();
 }
 
-class _ItemsActionButtonState extends State<_ItemsActionButton> with SingleTickerProviderStateMixin {
+class _ItemsActionButtonState extends State<ItemsActionButton> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -112,8 +127,7 @@ class _ItemsActionButtonState extends State<_ItemsActionButton> with SingleTicke
     _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
-    )
-      ..addListener(() {
+    )..addListener(() {
         if (mounted) {
           setState(() {});
         }
@@ -131,11 +145,7 @@ class _ItemsActionButtonState extends State<_ItemsActionButton> with SingleTicke
   }
 
   Widget _buildItem(BuildContext context, int index) {
-    final screenWidth = MediaQuery
-        .sizeOf(context)
-        .width;
-
-    TextDirection textDirection = Directionality.of(context);
+    final screenWidth = MediaQuery.sizeOf(context).width;
 
     // double animationDirection = textDirection == TextDirection.ltr ? -1 : 1;
 
@@ -153,13 +163,7 @@ class _ItemsActionButtonState extends State<_ItemsActionButton> with SingleTicke
           opacity: _animation.value,
           child: _buildFloatingActionItem(_textList[index], _iconList[index], () {
             _removeOverlay();
-            if (index == 0) {
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) => const TestEditDemo3()));
-            } else if (index == 1) {
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) => const EditMoodPage()));
-            } else if (index == 2) {
-              SimpleEventDialog.showEventDialog(context);
-            }
+            widget.onItemTap(index);
           }),
         ),
       ),
@@ -213,13 +217,13 @@ class _ItemsActionButtonState extends State<_ItemsActionButton> with SingleTicke
               },
               child: _controller.isCompleted
                   ? const Icon(
-                Icons.close,
-                size: 28,
-              )
+                      Icons.close,
+                      size: 28,
+                    )
                   : const Icon(
-                Icons.add,
-                size: 28,
-              )),
+                      Icons.add,
+                      size: 28,
+                    )),
         ),
       ],
     );

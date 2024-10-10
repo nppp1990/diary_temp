@@ -5,6 +5,7 @@ import 'package:dribbble/diary/common/test_configuration.dart';
 import 'package:dribbble/diary/data/bean/folder.dart';
 import 'package:dribbble/diary/data/local_storage.dart';
 import 'package:dribbble/diary/data/sqlite_helper.dart';
+import 'package:dribbble/diary/utils/dialog_utils.dart';
 import 'package:dribbble/diary/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
@@ -104,47 +105,26 @@ class _FolderListState extends State<_FolderList> {
       );
     }
 
-    final renderBox = context.findRenderObject() as RenderBox;
-    final Offset offset = renderBox.localToGlobal(Offset.zero);
-    bool isFromTop = offset.dy + renderBox.size.height + _menuHeight + 10 < MediaQuery.of(context).size.height;
-
-    _overlayEntry = OverlayEntry(builder: (context) {
-      return Stack(
-        children: [
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: _hideContextMenu,
-            ),
-          ),
-          Positioned(
-            top: isFromTop ? offset.dy + renderBox.size.height - 10 : offset.dy - _menuHeight - 10,
-            left: offset.dx + (isLeft ? renderBox.size.width / 2 : -_menuWidth + renderBox.size.width / 2),
-            // menu动画：从左到右、从上到下
-            child: _MenuAnimation(
-              isFromTop: isFromTop,
-              child: Material(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                elevation: 4,
-                child: SizedBox(
-                  width: _menuWidth,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      buildMenuItem('Modify', Icons.edit_outlined, () => _handleAction(FolderAction.modify, index)),
-                      buildMenuItem('Delete', Icons.delete_outline, () => _handleAction(FolderAction.delete, index)),
-                      buildMenuItem('Set default', Icons.star_outline_rounded,
-                          () => _handleAction(FolderAction.setDefault, index)),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      );
-    });
+    _overlayEntry = DialogUtils.getContextMenuOverlay(
+      context,
+      itemCount: 3,
+      itemBuilder: (_, i) {
+        switch (i) {
+          case 0:
+            return buildMenuItem('Modify', Icons.edit_outlined, () => _handleAction(FolderAction.modify, index));
+          case 1:
+            return buildMenuItem('Delete', Icons.delete_outline, () => _handleAction(FolderAction.delete, index));
+          case 2:
+            return buildMenuItem(
+                'Set default', Icons.star_outline_rounded, () => _handleAction(FolderAction.setDefault, index));
+          default:
+            return const SizedBox();
+        }
+      },
+      menuHeight: _menuItemHeight * 3,
+      menuWidth: _menuWidth,
+      hideContextMenu: _hideContextMenu,
+    );
     Overlay.of(context).insert(_overlayEntry!);
   }
 
@@ -396,61 +376,6 @@ class BookCover extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-}
-
-class _MenuAnimation extends StatefulWidget {
-  final Duration duration = const Duration(milliseconds: 200);
-  final Widget child;
-  final bool isFromTop;
-
-  const _MenuAnimation({
-    this.isFromTop = true,
-    required this.child,
-  });
-
-  @override
-  State<StatefulWidget> createState() => _MenuAnimationState();
-}
-
-class _MenuAnimationState extends State<_MenuAnimation> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<Offset> _slideAnimation;
-  late Animation<double> _fadeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this, duration: widget.duration);
-    _fadeAnimation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    );
-    _slideAnimation = Tween<Offset>(
-      begin: Offset(0, widget.isFromTop ? -0.1 : 0.1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _fadeAnimation,
-      child: SlideTransition(
-        position: _slideAnimation,
-        child: widget.child,
-      ),
     );
   }
 }

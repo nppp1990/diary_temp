@@ -1,8 +1,10 @@
 import 'package:dribbble/diary/data/bean/folder.dart';
 import 'package:dribbble/diary/data/sqlite_helper.dart';
 import 'package:dribbble/diary/utils/color.dart';
+import 'package:dribbble/diary/utils/docs.dart';
 import 'package:dribbble/diary/utils/time_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/quill_delta.dart';
 
 enum RecordType {
   diary,
@@ -78,5 +80,47 @@ class DiaryRecord {
       backgroundColor: ColorUtils.hexToColor(map[RecordManager.recordBackgroundColor]),
       backgroundImage: map[RecordManager.recordBackgroundImage],
     );
+  }
+
+  DiaryRecord copyWith({
+    int? id,
+    int? folderId,
+    List<int>? tagIds,
+    RecordType? type,
+    DateTime? time,
+    String? content,
+    int? mood,
+    bool? moodForAllDay,
+    Color? backgroundColor,
+    String? backgroundImage,
+  }) {
+    return DiaryRecord(
+      id: id ?? this.id,
+      folderId: folderId ?? this.folderId,
+      tagIds: tagIds ?? this.tagIds,
+      type: type ?? this.type,
+      time: time ?? this.time,
+      content: content ?? this.content,
+      mood: mood ?? this.mood,
+      moodForAllDay: moodForAllDay ?? this.moodForAllDay,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      backgroundImage: backgroundImage ?? this.backgroundImage,
+    );
+  }
+
+  void updateDiaryInfo() {
+    if (type == RecordType.diary && content != null) {
+      var info = DocUtils.parseDocInfo(content!);
+      diaryPlainText = info['allText'];
+      checkCount = info['checkCount'];
+      checkedCount = info['checkedCount'];
+    }
+  }
+
+  void updateDiaryInfoByDelta(Delta delta) {
+    var info = DocUtils.parseDocInfoByDelta(delta);
+    diaryPlainText = info['allText'];
+    checkCount = info['checkCount'];
+    checkedCount = info['checkedCount'];
   }
 }

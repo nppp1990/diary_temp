@@ -38,7 +38,11 @@ class _SimpleEventDialogState extends State<SimpleEventDialog> {
     _textNotifier = ValueNotifier(widget.record?.content);
   }
 
-  void _save() {
+  bool _hasChanged() {
+    return _textNotifier.value != widget.record?.content || _time != widget.record?.time.toTimeOfDay();
+  }
+
+  void _save() async {
     // print('save time: $_time, text: ${_textNotifier.value}');
     DateTime time;
     if (widget.record == null) {
@@ -55,12 +59,20 @@ class _SimpleEventDialogState extends State<SimpleEventDialog> {
       content: _textNotifier.value,
       time: time,
     );
-    if (record.id == null) {
-      RecordManager().insertRecord(record);
+    if (_hasChanged()) {
+      if (record.id == null) {
+        var id = await RecordManager().insertRecord(record);
+        if (id > 0 && mounted) {
+          record = record.copyWith(id: id);
+          Navigator.of(context).pop(record);
+        }
+      } else {
+        RecordManager().updateRecord(record);
+        Navigator.of(context).pop(record);
+      }
     } else {
-      RecordManager().updateRecord(record);
+      Navigator.of(context).pop();
     }
-    Navigator.of(context).pop();
   }
 
   @override
@@ -91,14 +103,16 @@ class _SimpleEventDialogState extends State<SimpleEventDialog> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: TestConfiguration.pagePadding),
-                      child: Text('event',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: TestColors.black1,
-                          )),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: TestConfiguration.pagePadding),
+                      child: Text(
+                        widget.record == null ? 'New Event' : 'Edit Event',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: TestColors.black1,
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Padding(
@@ -119,7 +133,9 @@ class _SimpleEventDialogState extends State<SimpleEventDialog> {
                     Row(
                       children: [
                         const SizedBox(width: TestConfiguration.pagePadding),
-                        _TimeLayout(
+                        DateLayout(date: widget.record?.time ?? DateTime.now()),
+                        const SizedBox(width: 8),
+                        TimeLayout(
                           time: _time,
                           onChanged: (time) {
                             _time = time;
@@ -160,17 +176,45 @@ class _SimpleEventDialogState extends State<SimpleEventDialog> {
   }
 }
 
-class _TimeLayout extends StatefulWidget {
+class DateLayout extends StatelessWidget {
+  final DateTime date;
+
+  const DateLayout({super.key, required this.date});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: TestColors.grey2,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.timer_outlined,
+              color: TestColors.black1,
+              size: 14,
+            ),
+            const SizedBox(width: 4),
+            Text(date.toDateString(), style: const TextStyle(color: TestColors.black1, fontSize: 12)),
+          ],
+        ));
+  }
+}
+
+class TimeLayout extends StatefulWidget {
   final TimeOfDay time;
   final ValueChanged<TimeOfDay> onChanged;
 
-  const _TimeLayout({required this.time, required this.onChanged});
+  const TimeLayout({super.key, required this.time, required this.onChanged});
 
   @override
   State<StatefulWidget> createState() => _TimeLayoutState();
 }
 
-class _TimeLayoutState extends State<_TimeLayout> {
+class _TimeLayoutState extends State<TimeLayout> {
   late TimeOfDay _time;
 
   @override
@@ -181,34 +225,36 @@ class _TimeLayoutState extends State<_TimeLayout> {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () async {
-        final time = await showTimePicker(context: context, initialTime: _time);
-        if (time != null) {
-          widget.onChanged(time);
-          setState(() {
-            _time = time;
-          });
-        }
-      },
-      child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: TestColors.grey2,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.timer_outlined,
-                color: TestColors.black1,
-                size: 14,
-              ),
-              const SizedBox(width: 4),
-              Text(TimeUtils.getTimeStr(_time), style: const TextStyle(color: TestColors.black1, fontSize: 12)),
-            ],
-          )),
+    return Material(
+      child: InkWell(
+        onTap: () async {
+          final time = await showTimePicker(context: context, initialTime: _time);
+          if (time != null) {
+            widget.onChanged(time);
+            setState(() {
+              _time = time;
+            });
+          }
+        },
+        child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: TestColors.grey2,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.timer_outlined,
+                  color: TestColors.primary,
+                  size: 14,
+                ),
+                const SizedBox(width: 4),
+                Text(TimeUtils.getTimeStr(_time), style: const TextStyle(color: TestColors.primary, fontSize: 12)),
+              ],
+            )),
+      ),
     );
   }
 }

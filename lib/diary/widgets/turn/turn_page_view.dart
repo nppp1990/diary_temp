@@ -110,17 +110,17 @@ class _TurnPageViewState extends State<TurnPageView> with TickerProviderStateMix
     );
 
     // test
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) {
-        widget.controller.animateToPage(1);
-      }
-    });
+    // Future.delayed(const Duration(seconds: 1), () {
+    //   if (mounted) {
+    //     widget.controller.animateToPage(1);
+    //   }
+    // });
   }
 
   @override
   void dispose() {
-    super.dispose();
     widget.controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -214,7 +214,7 @@ class TurnPageController extends ChangeNotifier {
 
   @override
   void dispose() {
-    print('-----TurnPageController dispose');
+    print('-----dispose');
     _animation.dispose();
     super.dispose();
   }

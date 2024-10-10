@@ -16,7 +16,6 @@ import 'package:dribbble/diary/widgets/edit/toolbar/template/template_add_dialog
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:flutter_quill/quill_delta.dart';
 
 import 'toolbar/color/color_toolbar_item.dart';
 import 'toolbar/emotion/emotion_selector.dart';
@@ -42,10 +41,11 @@ class TestEdit extends StatefulWidget {
 }
 
 class TestEditState extends State<TestEdit> {
+  DiaryRecord? get oldRecord => widget.record;
+
+
   final QuillController controller = QuillController.basic();
   final FocusNode _focusNode = FocusNode();
-
-  final BackgroundController backgroundController = BackgroundController();
 
   // late bool _showColorDialog;
   late ValueNotifier<bool> _showColorDialogNotifier;
@@ -58,6 +58,7 @@ class TestEditState extends State<TestEdit> {
   // record data
   int? _moodIndex;
   late DateTime _time;
+  late BackgroundController backgroundController;
 
   @override
   void initState() {
@@ -65,9 +66,8 @@ class TestEditState extends State<TestEdit> {
     _showColorDialogNotifier = ValueNotifier<bool>(false);
     _showBackgroundDialogNotifier = ValueNotifier<bool>(false);
     _showEmotionDialogNotifier = ValueNotifier<bool>(false);
-    _formatTitle();
     _focusNode.addListener(_focusChanged);
-    _time = widget.record?.time ?? DateTime.now();
+    _loadData();
   }
 
   void _focusChanged() {
@@ -122,7 +122,6 @@ class TestEditState extends State<TestEdit> {
   }
 
   void _formatTitle() {
-    // todo
     controller.formatText(0, 1, Attribute.h2);
   }
 
@@ -173,7 +172,7 @@ class TestEditState extends State<TestEdit> {
     }
   }
 
-  void _saveDoc() {
+  void _saveDoc() async {
     if (controller.document.isEmpty()) {
       DialogUtils.showToast(context, 'content is empty');
       return;
@@ -195,17 +194,52 @@ class TestEditState extends State<TestEdit> {
 
     DiaryRecord record = DiaryRecord(
       type: RecordType.diary,
-      id: widget.record?.id,
+      id: oldRecord?.id,
       content: jsonEncode(delta.toJson()),
       mood: _moodIndex,
       backgroundColor: bgColor,
       backgroundImage: bgImage,
       time: _time,
     );
+    record.updateDiaryInfoByDelta(delta);
     if (record.id == null) {
-      RecordManager().insertRecord(record);
+      int res = await RecordManager().insertRecord(record);
+      if (!mounted) {
+        return;
+      }
+      if (res > 0) {
+        DialogUtils.showToast(context, 'save success');
+        Navigator.pop(context, record.copyWith(id: res));
+      } else {
+        DialogUtils.showToast(context, 'save failed');
+        Navigator.pop(context);
+      }
     } else {
       RecordManager().updateRecord(record);
+      Navigator.pop(context, record);
+    }
+  }
+
+  void _loadData() {
+    if (oldRecord == null) {
+      _time = DateTime.now();
+      backgroundController = BackgroundController();
+      _formatTitle();
+    } else {
+      // load background
+      backgroundController = BackgroundController(
+          info: BackgroundInfo(
+        backgroundColor: oldRecord!.backgroundColor,
+        assetImage: oldRecord!.backgroundImage == null ? null : AssetImage(oldRecord!.backgroundImage!),
+      ));
+      // load mood
+      _moodIndex = oldRecord!.mood;
+      // load time
+      _time = oldRecord!.time;
+      if (oldRecord!.content != null) {
+        print('----load doc: ${oldRecord!.content}');
+        controller.document = Document.fromJson(jsonDecode(oldRecord!.content!));
+      }
     }
   }
 
@@ -243,7 +277,6 @@ class TestEditState extends State<TestEdit> {
         if (res is int && res > 0) {
           print('----save doc: $data');
           _saveDoc();
-          Navigator.of(context).pop();
         } else {
           Navigator.of(context).pop();
         }
@@ -254,7 +287,7 @@ class TestEditState extends State<TestEdit> {
   }
 
   bool _hasChanged(String data) {
-    if (widget.record == null) {
+    if (oldRecord == null) {
       return _moodIndex != null || !controller.document.isEmpty();
     }
     // todo
@@ -310,7 +343,6 @@ class TestEditState extends State<TestEdit> {
                   icon: const Icon(Icons.check),
                   onPressed: () {
                     _saveDoc();
-                    Navigator.pop(context);
                   },
                 ),
               ],

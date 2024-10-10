@@ -46,8 +46,7 @@ abstract class DocUtils {
     return textPainter.computeLineMetrics();
   }
 
-  static parseDocInfo(String deltaJson) {
-    final delta = Delta.fromJson(jsonDecode(deltaJson));
+  static parseDocInfoByDelta(Delta delta) {
     String allText = '';
     int checkCount = 0;
     int checkedCount = 0;
@@ -72,6 +71,11 @@ abstract class DocUtils {
       'checkCount': checkCount,
       'checkedCount': checkedCount,
     };
+  }
+
+  static parseDocInfo(String deltaJson) {
+    final delta = Delta.fromJson(jsonDecode(deltaJson));
+    return parseDocInfoByDelta(delta);
   }
 
   static String getPlainTextFromJson(String deltaJson) {
@@ -141,11 +145,11 @@ abstract class DocUtils {
         map[dateKey] = [record];
       }
     }
-    // List<DiaryRecord> 按照time从大到小排序
+    // List<DiaryRecord> 按照time从小到大排序
     map.forEach((key, value) {
-      value.sort((a, b) => b.time.compareTo(a.time));
+      value.sort((a, b) => a.time.compareTo(b.time));
     });
-    // map 按照time从大到小排序
+    // map 按照time从小到大排序
     return SplayTreeMap<DateKey, List<DiaryRecord>>.from(map, (a, b) => a.compareTo(b));
   }
 

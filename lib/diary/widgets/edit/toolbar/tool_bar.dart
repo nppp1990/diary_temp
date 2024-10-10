@@ -38,7 +38,7 @@ class _ToolbarState extends State<Toolbar> {
   void initState() {
     super.initState();
     keyboardSubscription = KeyboardVisibilityController().onChange.listen((bool visible) {
-      if (!context.mounted) {
+      if (!mounted) {
         return;
       }
 

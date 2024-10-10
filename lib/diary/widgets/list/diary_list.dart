@@ -16,39 +16,7 @@ class BaseListView extends StatelessWidget {
   static List<TestInfo> generateTestListData(List<DiaryRecord> records) {
     List<TestInfo> data = [];
     for (var record in records) {
-      switch (record.type) {
-        case RecordType.event:
-          data.add(
-            TestInfo(
-              record: record,
-              type: RecordType.event,
-              note: record.content,
-              time: record.time,
-            ),
-          );
-          break;
-        case RecordType.mood:
-          data.add(TestInfo(
-            record: record,
-            type: RecordType.mood,
-            moodIndex: record.mood,
-            note: record.content,
-            isOneDayMood: record.moodForAllDay,
-            time: record.time,
-          ));
-          break;
-        case RecordType.diary:
-          data.add(TestInfo(
-            record: record,
-            type: RecordType.diary,
-            moodIndex: record.mood,
-            note: record.diaryPlainText,
-            time: record.time,
-            checkCount: record.checkCount == 0 ? null : record.checkCount,
-            checkedCount: record.checkCount == 0 ? null : record.checkedCount,
-          ));
-          break;
-      }
+      data.add(TestInfo.fromRecord(record));
     }
     return data;
   }
@@ -203,6 +171,37 @@ class TestInfo {
     this.isOneDayMood,
     required this.time,
   });
+
+  factory TestInfo.fromRecord(DiaryRecord record) {
+    switch (record.type) {
+      case RecordType.event:
+        return TestInfo(
+          record: record,
+          type: RecordType.event,
+          note: record.content,
+          time: record.time,
+        );
+      case RecordType.mood:
+        return TestInfo(
+          record: record,
+          type: RecordType.mood,
+          moodIndex: record.mood,
+          note: record.content,
+          isOneDayMood: record.moodForAllDay,
+          time: record.time,
+        );
+      case RecordType.diary:
+        return TestInfo(
+          record: record,
+          type: RecordType.diary,
+          moodIndex: record.mood,
+          note: record.diaryPlainText,
+          time: record.time,
+          checkCount: record.checkCount == 0 ? null : record.checkCount,
+          checkedCount: record.checkCount == 0 ? null : record.checkedCount,
+        );
+    }
+  }
 }
 
 class _TestItemState extends State<_TestItem> {
