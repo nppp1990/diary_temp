@@ -35,8 +35,9 @@ class TestEditDemo3 extends StatelessWidget {
 
 class DiaryEditPage extends StatefulWidget {
   final DiaryRecord? record;
+  final DateTime? dateTime;
 
-  const DiaryEditPage({super.key, this.record});
+  const DiaryEditPage({super.key, this.record, this.dateTime});
 
   @override
   State<StatefulWidget> createState() => DiaryEditPageState();
@@ -224,7 +225,7 @@ class DiaryEditPageState extends State<DiaryEditPage> {
 
   void _loadData() {
     if (oldRecord == null) {
-      _time = DateTime.now();
+      _time = widget.dateTime ?? DateTime.now();
       backgroundController = BackgroundController();
       _formatTitle();
     } else {

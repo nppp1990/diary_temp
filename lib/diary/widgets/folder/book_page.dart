@@ -318,7 +318,8 @@ class _BookPageState extends State<_BookPageStateWidget> {
       final currentDate = recordMap.keys.elementAt(pageController.currentIndex - 1);
       dynamic res;
       if (event.type == RecordType.diary) {
-        res = await Navigator.of(context).push(MaterialPageRoute(builder: (context) => const DiaryEditPage()));
+        res = await Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => DiaryEditPage(dateTime: currentDate.toDateTime())));
       } else if (event.type == RecordType.mood) {
         res = await MoodDialog.showMoodDialog(context, dateTime: currentDate.toDateTime());
       } else if (event.type == RecordType.event) {
