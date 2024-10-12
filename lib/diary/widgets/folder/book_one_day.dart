@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:dribbble/diary/data/bean/record.dart';
+import 'package:dribbble/diary/data/sqlite_helper.dart';
 import 'package:dribbble/diary/utils/dialog_utils.dart';
+import 'package:dribbble/diary/utils/time_utils.dart';
 import 'package:dribbble/diary/widgets/edit/edit_demo3.dart';
 import 'package:dribbble/diary/widgets/emotion/edit_mood.dart';
-import 'package:dribbble/diary/widgets/folder/folder_page.dart';
+import 'package:dribbble/diary/widgets/folder/book_page.dart';
 import 'package:dribbble/diary/widgets/list/diary_list.dart';
 import 'package:dribbble/diary/widgets/list/diary_list3.dart';
 import 'package:dribbble/diary/widgets/router_utils.dart';
@@ -13,12 +17,16 @@ class OneDayItem extends StatefulWidget {
   final DateTime dateTime;
   final List<DiaryRecord> records;
   final List<TestInfo> data;
+  final int? changedRecordId;
+  final Function(Offset position, Size size) onSizeGet;
 
   const OneDayItem({
     super.key,
     required this.dateTime,
     required this.records,
     required this.data,
+    this.changedRecordId,
+    required this.onSizeGet,
   });
 
   @override
@@ -27,7 +35,6 @@ class OneDayItem extends StatefulWidget {
 
 class _OneDayItem extends State<OneDayItem> {
   final Map<int, GlobalKey<DiaryListItemState>> _itemKeys = {};
-  int? _changedRecordId;
   OverlayEntry? _overlayEntry;
 
   List<TestInfo> get data => widget.data;
@@ -37,8 +44,7 @@ class _OneDayItem extends State<OneDayItem> {
   static const _menuWidth = 180.0;
   static const _menuItemHeight = 24.0 + 16.0 * 2;
 
-  Offset _parentPosition = Offset.zero;
-  Size _parentSize = Size.zero;
+  late StreamSubscription<TriggerEvent> triggerTouchSubscription;
 
   @override
   void initState() {
@@ -48,13 +54,33 @@ class _OneDayItem extends State<OneDayItem> {
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       var renderBox = context.findRenderObject() as RenderBox;
-      _parentPosition = renderBox.localToGlobal(Offset.zero);
-      _parentSize = renderBox.size;
+      widget.onSizeGet(renderBox.localToGlobal(Offset.zero), renderBox.size);
+    });
+    triggerTouchSubscription = bookEventBus.on<TriggerEvent>().listen((event) async {
+      var id = event.recordId;
+      if (mounted && _itemKeys.containsKey(id)) {
+        final RenderBox renderBox = _itemKeys[id]!.currentContext!.findRenderObject() as RenderBox;
+        BookPageItemContentProvider.of(context)?.moveItemVisible(renderBox).then((_) {
+          _itemKeys[id]!.currentState?.triggerItemTap();
+        });
+      }
     });
   }
 
   @override
+  void didUpdateWidget(covariant OneDayItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    for (var record in records) {
+      if (!_itemKeys.containsKey(record.id)) {
+        _itemKeys[record.id!] = GlobalKey();
+      }
+    }
+    print('-------didUpdateWidget one day item');
+  }
+
+  @override
   void dispose() {
+    triggerTouchSubscription.cancel();
     _hideContextMenu();
     super.dispose();
   }
@@ -76,17 +102,18 @@ class _OneDayItem extends State<OneDayItem> {
         res = await SimpleEventDialog.showEventDialog(context, record: record);
         break;
       case RecordType.diary:
-        res = await Navigator.push(context, Left2RightRouter(child: TestEdit(record: record)));
+        res = await Navigator.push(context, Left2RightRouter(child: DiaryEditPage(record: record)));
+        // res = await Navigator.push(context, MaterialPageRoute(builder: (context) => TestEditDemo3()));
         break;
     }
     if (res is DiaryRecord && mounted) {
-      _changedRecordId = res.id;
       data[recordIndex] = TestInfo.fromRecord(res);
       records[recordIndex] = res;
-      BookPageItemContentProvider.of(context)?.refresh(
+      BookPageItemContentProvider.of(context)?.refreshList(
         changedItemKey: _itemKeys[record.id!]!,
-        parentPosition: _parentPosition,
-        parentSize: _parentSize,
+        oldTime: record.time,
+        changedRecord: res,
+        needUpdateParent: !record.time.isSameDay(res.time),
       );
     }
   }
@@ -115,19 +142,20 @@ class _OneDayItem extends State<OneDayItem> {
     }
     var res = await DialogUtils.showConfirmDialog(context, title: title, content: content);
     if (res is int && res > 0 && mounted) {
+      RecordManager().deleteRecord(record.id!);
       data.removeAt(recordIndex);
       records.removeAt(recordIndex);
-      BookPageItemContentProvider.of(context)?.refresh();
+      BookPageItemContentProvider.of(context)?.refreshList();
       // RecordManager().deleteRecord(record.id!);
     }
   }
 
   _showMoreContextMenu(
-      BuildContext itemContext,
-      BuildContext triggerContext,
-      int recordIndex,
-      Offset? position,
-      ) {
+    BuildContext itemContext,
+    BuildContext triggerContext,
+    int recordIndex,
+    Offset? position,
+  ) {
     Widget buildMenuItem(String title, IconData icon, Function() onAction) {
       return SizedBox(
         height: _menuItemHeight,
@@ -175,14 +203,8 @@ class _OneDayItem extends State<OneDayItem> {
   }
 
   @override
-  void didUpdateWidget(covariant OneDayItem oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    print('-------didUpdateWidget one day item');
-  }
-
-  @override
   Widget build(BuildContext context) {
-    print('-------build one day item');
+    print('-------build one day item: ${widget.dateTime.toDateString()}');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -196,6 +218,7 @@ class _OneDayItem extends State<OneDayItem> {
             isOnlyOne: data.length == 1,
             maxLines: 5,
             onMoreTap: (itemContext, triggerContext, position) {
+              Feedback.forLongPress(itemContext);
               _showMoreContextMenu(itemContext, triggerContext, i, position);
             },
           ),

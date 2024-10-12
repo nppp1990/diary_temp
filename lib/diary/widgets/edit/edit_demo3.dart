@@ -23,26 +23,27 @@ import 'toolbar/second_dialog.dart';
 import 'toolbar/tool_bar.dart';
 
 class TestEditDemo3 extends StatelessWidget {
-  const TestEditDemo3({super.key});
+  final DiaryRecord? record;
+
+  const TestEditDemo3({super.key, this.record});
 
   @override
   Widget build(BuildContext context) {
-    return const TestEdit();
+    return DiaryEditPage(record: record);
   }
 }
 
-class TestEdit extends StatefulWidget {
+class DiaryEditPage extends StatefulWidget {
   final DiaryRecord? record;
 
-  const TestEdit({super.key, this.record});
+  const DiaryEditPage({super.key, this.record});
 
   @override
-  State<StatefulWidget> createState() => TestEditState();
+  State<StatefulWidget> createState() => DiaryEditPageState();
 }
 
-class TestEditState extends State<TestEdit> {
+class DiaryEditPageState extends State<DiaryEditPage> {
   DiaryRecord? get oldRecord => widget.record;
-
 
   final QuillController controller = QuillController.basic();
   final FocusNode _focusNode = FocusNode();
@@ -202,16 +203,17 @@ class TestEditState extends State<TestEdit> {
       time: _time,
     );
     record.updateDiaryInfoByDelta(delta);
+    print('----record: $record');
     if (record.id == null) {
       int res = await RecordManager().insertRecord(record);
       if (!mounted) {
         return;
       }
       if (res > 0) {
-        DialogUtils.showToast(context, 'save success');
+        // DialogUtils.showToast(context, 'save success');
         Navigator.pop(context, record.copyWith(id: res));
       } else {
-        DialogUtils.showToast(context, 'save failed');
+        // DialogUtils.showToast(context, 'save failed');
         Navigator.pop(context);
       }
     } else {
@@ -243,13 +245,6 @@ class TestEditState extends State<TestEdit> {
     }
   }
 
-  void _loadDoc(String? json) {
-    if (json == null) {
-      return;
-    }
-    controller.document = Document.fromJson(jsonDecode(json));
-  }
-
   String getFirstText(QuillController controller) {
     if (controller.document.isEmpty()) {
       return '';
@@ -262,9 +257,7 @@ class TestEditState extends State<TestEdit> {
   }
 
   void _handlePop(BuildContext context) async {
-    print('----pop: mood: $_moodIndex');
     final data = jsonEncode(controller.document.toDelta().toJson());
-    print('----pop: doc: $data');
     if (_hasChanged(data)) {
       var res = await DialogUtils.showConfirmDialog(
         context,
@@ -453,14 +446,14 @@ class TestEditState extends State<TestEdit> {
 }
 
 class ToolBarDialogProvider extends InheritedWidget {
-  final TestEditState state;
+  final DiaryEditPageState state;
 
   const ToolBarDialogProvider({super.key, required this.state, required super.child});
 
   @override
   bool updateShouldNotify(covariant InheritedWidget oldWidget) => false;
 
-  static TestEditState of(BuildContext context) {
+  static DiaryEditPageState of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<ToolBarDialogProvider>()!.state;
   }
 }

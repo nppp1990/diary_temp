@@ -1,4 +1,3 @@
-import 'dart:math';
 
 import 'package:dribbble/diary/common/test_colors.dart';
 import 'package:dribbble/diary/common/test_configuration.dart';
@@ -263,6 +262,7 @@ class BookCover extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('----build BookCover folder: $folder');
     return Material(
       color: folder?.backgroundColor ?? Colors.white,
       borderRadius: BorderRadius.only(

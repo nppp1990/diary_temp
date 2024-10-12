@@ -6,7 +6,7 @@ import 'package:dribbble/diary/widgets/edit/edit_demo3.dart';
 import 'package:dribbble/diary/widgets/edit/toolbar/template/template_list.dart';
 import 'package:dribbble/diary/widgets/emotion/edit_mood.dart';
 import 'package:dribbble/diary/widgets/emotion/emotion_list.dart';
-import 'package:dribbble/diary/widgets/folder/folder_page.dart';
+import 'package:dribbble/diary/widgets/folder/book_page.dart';
 import 'package:dribbble/diary/widgets/folder/folders_page.dart';
 import 'package:dribbble/diary/widgets/menu/home.dart';
 import 'package:dribbble/diary/widgets/page_turn.dart';
@@ -132,10 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
       );
     }),
     ListItem('edit emotion', (context) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const EditMoodPage()),
-      );
+      MoodDialog.showMoodDialog(context);
     }),
     ListItem('template list', (context) {
       Navigator.push(
@@ -171,7 +168,7 @@ class _MyHomePageState extends State<MyHomePage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => FolderPage(
+          builder: (context) => DiaryBook(
             folder: Folder(
               id: 1,
               name: 'Test Book',
@@ -193,6 +190,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.white,
@@ -202,6 +200,12 @@ class _MyHomePageState extends State<MyHomePage> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _init();
     });
+  }
+
+  @override
+  dispose() {
+    print('----dispose');
+    super.dispose();
   }
 
   _init() async {

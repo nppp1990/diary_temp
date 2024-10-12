@@ -8,7 +8,7 @@ import 'package:dribbble/diary/utils/time_utils.dart';
 import 'package:dribbble/diary/widgets/TriggerInkWell.dart';
 import 'package:dribbble/diary/widgets/edit/edit_demo3.dart';
 import 'package:dribbble/diary/widgets/emotion/edit_mood.dart';
-import 'package:dribbble/diary/widgets/folder/folder_page.dart';
+import 'package:dribbble/diary/widgets/folder/book_page.dart';
 import 'package:dribbble/diary/widgets/list/diary_list.dart';
 import 'package:dribbble/diary/widgets/router_utils.dart';
 import 'package:dribbble/diary/widgets/simple/event_dialog.dart';
@@ -167,7 +167,6 @@ class DiaryListItemState extends State<DiaryListItem> {
   }) async {
     RenderBox box = context.findRenderObject() as RenderBox;
     Offset position = box.localToGlobal(const Offset(1, 1));
-    print('-------triggerItemTap position: $position');
     Future.delayed(delay, () async {
       if (!mounted) {
         return;
@@ -186,7 +185,7 @@ class DiaryListItemState extends State<DiaryListItem> {
   }
 
   void triggerItemTap({
-    Duration delay = const Duration(milliseconds: 500),
+    Duration delay = const Duration(milliseconds: 1000),
     Duration touchDuration = const Duration(milliseconds: 1000),
   }) {
     _triggerItemTap(delay: delay, touchDuration: touchDuration);
@@ -258,7 +257,6 @@ class DiaryListItemState extends State<DiaryListItem> {
           _tapPosition = details.globalPosition;
         },
         onTap: () {
-          print('-------onTap---showSplash: $_showSplash');
           if (!_showSplash) {
             widget.onMoreTap?.call(context, context, _tapPosition);
           }
@@ -404,7 +402,6 @@ class DiaryListItemState extends State<DiaryListItem> {
                                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                           ),
                                           onPressed: () {
-                                            Feedback.forLongPress(moreContext);
                                             widget.onMoreTap!(context, moreContext, null);
                                           },
                                           icon: const Icon(

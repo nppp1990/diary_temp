@@ -12,7 +12,7 @@ class ColiContainer extends StatelessWidget {
     double coliWidth = coliPaddingLeft * 386 / 148;
     double coliHeight = coliWidth * 179 / 386;
     int coliCount = (height - coliHeight * 0.5) ~/ (coliHeight * 1.5);
-    final controller = TurnPageController(duration: const Duration(seconds: 1), cornerRadius: 10);
+    final controller = TurnPageController(duration: const Duration(seconds: 1), cornerRadius: 10, initialPage: 3);
 
     return SizedBox(
       height: height,

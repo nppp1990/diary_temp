@@ -51,7 +51,7 @@ class TestCalendarPage extends StatelessWidget {
 class DiaryCalendarInfo {
   // final DateTime date;
   final int? mood;
-  final List<DiaryRecord>? records;
+  final List<DiaryRecord> records;
 
   DiaryCalendarInfo({
     // required this.date,
@@ -94,7 +94,7 @@ class _DiaryCalendarState extends State<DiaryCalendar> {
     final dateKey = DateKey.fromDateTime(date);
     final diaryCalendarInfo = testMap[dateKey];
     bool isSelected = date.isSameDay(_selectedDay);
-    if (diaryCalendarInfo == null) {
+    if (diaryCalendarInfo == null || diaryCalendarInfo.records.isEmpty) {
       if (isSelected) {
         return Container(
           margin: const EdgeInsets.all(6.0),
@@ -215,6 +215,7 @@ class _DiaryCalendarState extends State<DiaryCalendar> {
                 setState(() {
                   _selectedDay = today;
                   _focusedDay = today;
+                  widget.onDayChanged?.call(today);
                 });
               },
               child: Padding(

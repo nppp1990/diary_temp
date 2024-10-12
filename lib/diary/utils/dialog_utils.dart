@@ -209,8 +209,6 @@ abstract class DialogUtils {
       left = offset.dx + (isFromLeft ? renderBox.size.width / 2 : -menuWidth + renderBox.size.width / 2);
     }
 
-    print('----show menu top: $top, left: $left');
-
     return OverlayEntry(builder: (context) {
       return Stack(
         children: [

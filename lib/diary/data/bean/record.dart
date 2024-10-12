@@ -47,6 +47,9 @@ class DiaryRecord {
     this.moodForAllDay,
     this.backgroundColor,
     this.backgroundImage,
+    this.diaryPlainText,
+    this.checkedCount,
+    this.checkCount,
   });
 
   Map<String, dynamic> toMap() {
@@ -93,6 +96,9 @@ class DiaryRecord {
     bool? moodForAllDay,
     Color? backgroundColor,
     String? backgroundImage,
+    String? diaryPlainText,
+    int? checkedCount,
+    int? checkCount,
   }) {
     return DiaryRecord(
       id: id ?? this.id,
@@ -105,6 +111,9 @@ class DiaryRecord {
       moodForAllDay: moodForAllDay ?? this.moodForAllDay,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       backgroundImage: backgroundImage ?? this.backgroundImage,
+      diaryPlainText: diaryPlainText ?? this.diaryPlainText,
+      checkedCount: checkedCount ?? this.checkedCount,
+      checkCount: checkCount ?? this.checkCount,
     );
   }
 
@@ -122,5 +131,10 @@ class DiaryRecord {
     diaryPlainText = info['allText'];
     checkCount = info['checkCount'];
     checkedCount = info['checkedCount'];
+  }
+
+  @override
+  String toString() {
+    return 'DiaryRecord{id: $id, folderId: $folderId, tagIds: $tagIds, type: $type, time: $time, content: $content, mood: $mood, moodForAllDay: $moodForAllDay, backgroundColor: $backgroundColor, backgroundImage: $backgroundImage, diaryPlainText: $diaryPlainText, checkedCount: $checkedCount, checkCount: $checkCount}';
   }
 }

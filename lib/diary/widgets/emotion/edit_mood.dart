@@ -2,7 +2,6 @@ import 'package:dribbble/diary/common/test_colors.dart';
 import 'package:dribbble/diary/common/test_configuration.dart';
 import 'package:dribbble/diary/data/bean/record.dart';
 import 'package:dribbble/diary/data/sqlite_helper.dart';
-import 'package:dribbble/diary/utils/dialog_utils.dart';
 import 'package:dribbble/diary/utils/time_utils.dart';
 import 'package:dribbble/diary/widgets/bubble.dart';
 import 'package:dribbble/diary/widgets/card.dart';
@@ -15,16 +14,25 @@ import '../simple/event_dialog.dart';
 class MoodDialog extends StatefulWidget {
   final DiaryRecord? record;
 
-  const MoodDialog({super.key, this.record});
+  // 此种情况只有测试时会用到
+  final DateTime? dateTime;
+
+  // record 和 time 不能同时有
+  const MoodDialog({
+    super.key,
+    this.record,
+    this.dateTime,
+  }) : assert(record == null || dateTime == null, 'record 和 dateTime 不能同时有');
 
   @override
   State<StatefulWidget> createState() => _MoodDialogState();
 
-  static showMoodDialog(BuildContext context, {DiaryRecord? record}) {
+  static showMoodDialog(BuildContext context, {DiaryRecord? record, DateTime? dateTime}) {
     return showDialog(
       context: context,
       builder: (context) => MoodDialog(
         record: record,
+        dateTime: dateTime,
       ),
     );
   }
@@ -33,14 +41,22 @@ class MoodDialog extends StatefulWidget {
 class _MoodDialogState extends State<MoodDialog> {
   late int _moodIndex;
   late TimeOfDay _time;
+  late TimeOfDay _oldTime;
   late ValueNotifier<bool> _isOneDayMood;
   late String? _note;
+  late DateTime _initDateTime;
 
   @override
   void initState() {
     super.initState();
     _moodIndex = widget.record?.mood ?? 4;
-    _time = widget.record?.time.toTimeOfDay() ?? TimeOfDay.now();
+    if (widget.dateTime != null) {
+      _initDateTime = widget.dateTime!;
+    } else {
+      _initDateTime = widget.record?.time ?? DateTime.now();
+    }
+    _time = _initDateTime.toTimeOfDay();
+    _oldTime = _time;
     _isOneDayMood = ValueNotifier(widget.record?.moodForAllDay ?? false);
     _note = widget.record?.content;
   }
@@ -53,22 +69,22 @@ class _MoodDialogState extends State<MoodDialog> {
 
   bool _hasChanged() {
     bool oldIsOneDayMood = widget.record?.moodForAllDay ?? false;
+
     return _moodIndex != widget.record?.mood ||
         _note != widget.record?.content ||
         _isOneDayMood.value != oldIsOneDayMood ||
-        _time != widget.record?.time.toTimeOfDay();
+        _time != _oldTime;
   }
 
   _save() async {
     print('save: $_moodIndex, ${_isOneDayMood.value}, ${_time.toString()}, note: $_note');
-    DateTime time = widget.record?.time ?? DateTime.now();
     DiaryRecord record = DiaryRecord(
       id: widget.record?.id,
       type: RecordType.mood,
       mood: _moodIndex,
       moodForAllDay: _isOneDayMood.value,
       content: _note,
-      time: time.copyWith(hour: _time.hour, minute: _time.minute),
+      time: _initDateTime.copyWith(hour: _time.hour, minute: _time.minute),
     );
     if (_hasChanged()) {
       if (record.id == null) {
@@ -194,7 +210,7 @@ class _MoodDialogState extends State<MoodDialog> {
                     Row(
                       children: [
                         const SizedBox(width: TestConfiguration.pagePadding),
-                        DateLayout(date: widget.record?.time ?? DateTime.now()),
+                        DateLayout(date: widget.dateTime ?? widget.record?.time ?? DateTime.now()),
                         const SizedBox(width: 8),
                         TimeLayout(
                           time: _time,
@@ -228,118 +244,6 @@ class _MoodDialogState extends State<MoodDialog> {
             ),
           ),
         ));
-  }
-}
-
-class EditMoodPage extends StatefulWidget {
-  // final int? moodIndex;
-  // final String? note;
-  // final bool? isOneDayMood;
-  final DiaryRecord? record;
-
-  const EditMoodPage({super.key, this.record});
-
-  @override
-  State<StatefulWidget> createState() => _EditMoodPageState();
-}
-
-class _EditMoodPageState extends State<EditMoodPage> {
-  late int? _moodIndex;
-  late String? _note;
-  late bool _isOneDayMood;
-
-  @override
-  void initState() {
-    super.initState();
-    _moodIndex = widget.record?.mood;
-    _note = widget.record?.content;
-    _isOneDayMood = widget.record?.moodForAllDay ?? false;
-  }
-
-  bool _hasChanged() {
-    bool oldIsOneDayMood = widget.record?.moodForAllDay ?? false;
-    return _moodIndex != widget.record?.mood || _note != widget.record?.content || _isOneDayMood != oldIsOneDayMood;
-  }
-
-  void _saveMood() async {
-    if (_moodIndex == null || !_hasChanged()) {
-      return;
-    }
-    var record = DiaryRecord(
-      id: widget.record?.id,
-      type: RecordType.mood,
-      mood: _moodIndex!,
-      content: _note,
-      moodForAllDay: _isOneDayMood,
-      time: widget.record?.time ?? DateTime.now(),
-    );
-    if (record.id == null) {
-      RecordManager().insertRecord(record);
-    } else {
-      RecordManager().updateRecord(record);
-    }
-  }
-
-  void _handlePop(BuildContext context) async {
-    if (_moodIndex == null || !_hasChanged()) {
-      Navigator.pop(context);
-      return;
-    }
-    var res = await DialogUtils.showConfirmDialog(
-      context,
-      title: 'Save Mood?',
-      content: 'You have unsaved changes. Do you want to save them?',
-      cancelText: 'Discard',
-      confirmText: 'Save',
-    );
-    if (context.mounted) {
-      if (res is int && res > 0) {
-        _saveMood();
-        Navigator.of(context).pop();
-      } else {
-        Navigator.of(context).pop();
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) {
-          return;
-        }
-        _handlePop(context);
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Edit Mood'),
-          iconTheme: TestConfiguration.toolbarIconStyle,
-          forceMaterialTransparency: true,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.check),
-              onPressed: () {
-                _saveMood();
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
-        body: EditMoodPageContent(
-          onChanged: (isOneDayMood, moodIndex, note) {
-            print('onChanged: $isOneDayMood, $moodIndex, $note');
-            _isOneDayMood = isOneDayMood;
-            _moodIndex = moodIndex;
-            _note = note;
-          },
-          isOneDayMood: _isOneDayMood,
-          note: _note,
-          moodIndex: _moodIndex,
-        ),
-      ),
-    );
   }
 }
 

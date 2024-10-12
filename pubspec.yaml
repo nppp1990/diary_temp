@@ -59,6 +59,7 @@ dependencies:
     git:
       url: https://github.com/aleksanderwozniak/table_calendar.git
       ref: v3.1.2
+  event_bus: ^2.0.1
 
 
 dev_dependencies:
